@@ -4,19 +4,34 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ── Firebase 初期化 ──────────────────────────────────────────
-// 環境変数 FIREBASE_SERVICE_ACCOUNT にサービスアカウントJSON文字列をセット
-if (!getApps().length) {
-  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-  initializeApp({ credential: cert(serviceAccount) });
+// ── Firebase 初期化（任意）────────────────────────────────────
+// FIREBASE_SERVICE_ACCOUNT が設定されている場合のみ Firestore を有効化
+// 未設定の場合はコメント機能なしで動作する
+let db = null;
+let FieldValue = null;
+
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  try {
+    const { initializeApp, cert, getApps } = await import('firebase-admin/app');
+    const firestoreModule = await import('firebase-admin/firestore');
+    FieldValue = firestoreModule.FieldValue;
+
+    if (!getApps().length) {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      initializeApp({ credential: cert(serviceAccount) });
+    }
+    db = firestoreModule.getFirestore();
+    console.log('✅ Firestore 接続完了');
+  } catch (err) {
+    console.error('⚠️  Firestore 初期化失敗（コメント機能は無効）:', err.message);
+  }
+} else {
+  console.warn('⚠️  FIREBASE_SERVICE_ACCOUNT 未設定 — コメント機能は無効です');
 }
-const db = getFirestore();
 
 // ── Express 設定 ─────────────────────────────────────────────
 const app = express();
@@ -33,28 +48,32 @@ function avgRating(comments) {
   return Math.round((sum / comments.length) * 10) / 10;
 }
 
-// Firestore のドキュメントIDに使えない文字を置換
 function toDocId(str) {
   return str.replace(/\//g, '__SLASH__');
 }
 
-// Firestore からコメント一覧を取得
+// Firestore からコメント取得（未接続なら空配列を返す）
 async function fetchComments(novelId) {
-  const snap = await db
-    .collection('comments')
-    .doc(toDocId(novelId))
-    .collection('items')
-    .orderBy('createdAt', 'asc')
-    .get();
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  if (!db) return [];
+  try {
+    const snap = await db
+      .collection('comments')
+      .doc(toDocId(novelId))
+      .collection('items')
+      .orderBy('createdAt', 'asc')
+      .get();
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.error('fetchComments エラー:', err.message);
+    return [];
+  }
 }
 
-// novels ディレクトリをスキャンし、Firestore の評価情報も付与
+// novels ディレクトリをスキャンし、評価情報を付与して返す
 async function scanNovels() {
   const novels = [];
   if (!fs.existsSync(NOVELS_DIR)) return novels;
 
-  // 全小説のIDをまとめて収集してから Firestore を一括参照
   const entries = fs.readdirSync(NOVELS_DIR, { withFileTypes: true });
   const novelIds = [];
 
@@ -66,7 +85,7 @@ async function scanNovels() {
     }
   }
 
-  // 各IDのコメント集計を並列取得
+  // コメント集計を並列取得
   const commentStats = await Promise.all(
     novelIds.map(async id => {
       const comments = await fetchComments(id);
@@ -131,6 +150,7 @@ app.get('/api/novels', async (req, res) => {
   try {
     res.json(await scanNovels());
   } catch (err) {
+    console.error('/api/novels エラー:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -142,6 +162,7 @@ app.get('/api/novels/:id(*)', async (req, res) => {
     if (!novel) return res.status(404).json({ error: 'Not found' });
     res.json(novel);
   } catch (err) {
+    console.error('/api/novels/:id エラー:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -156,6 +177,9 @@ app.get('/api/comments/:id(*)', async (req, res) => {
 });
 
 app.post('/api/comments/:id(*)', async (req, res) => {
+  if (!db) {
+    return res.status(503).json({ error: 'コメント機能は現在利用できません（Firebase未設定）' });
+  }
   try {
     const { name, rating, comment } = req.body;
     if (!name || !rating || !comment) {
@@ -182,9 +206,9 @@ app.post('/api/comments/:id(*)', async (req, res) => {
       .doc(newComment.id)
       .set(newComment);
 
-    // レスポンス用に serverTimestamp を ISO 文字列に変換
     res.status(201).json({ ...newComment, createdAt: new Date().toISOString() });
   } catch (err) {
+    console.error('/api/comments POST エラー:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -198,5 +222,5 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
