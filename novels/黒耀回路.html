@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>黒耀回路 ——未選択の彼方へ——</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&family=Zen+Old+Mincho:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-deep: #07070d;
+    --bg-mid: #0a0a1a;
+    --bg-surface: #0f0f22;
+    --bg-glass: rgba(15, 15, 34, 0.6);
+
+    --kokuyou-cyan: #00d4ff;
+    --kokuyou-cyan-dim: #0099bb;
+    --kokuyou-cyan-glow: rgba(0, 212, 255, 0.15);
+    --kokuyou-dark: #003344;
+
+    --kosen-red: #ff2244;
+    --kosen-red-dim: #aa1133;
+    --kosen-red-glow: rgba(255, 34, 68, 0.15);
+
+    --abura-amber: #e8a020;
+    --abura-amber-dim: #aa7010;
+    --abura-amber-glow: rgba(232, 160, 32, 0.15);
+
+    --pragma-violet: #9933ff;
+    --pragma-violet-glow: rgba(153, 51, 255, 0.2);
+
+    --text-primary: #e0e8f0;
+    --text-secondary: #8899aa;
+    --text-dim: #445566;
+
+    --border-subtle: rgba(0, 212, 255, 0.08);
+    --border-mid: rgba(0, 212, 255, 0.2);
+  }
+
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'Noto Serif JP', 'Hiragino Mincho ProN', serif;
+    font-weight: 300;
+    line-height: 2.0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ── 背景装飾 ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 20%, rgba(0, 212, 255, 0.04) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 80% 80%, rgba(153, 51, 255, 0.04) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 50% 50%, rgba(255, 34, 68, 0.02) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+    background-size: 80px 80px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── ナビゲーション ── */
+  .nav-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 240px;
+    background: rgba(7, 7, 13, 0.95);
+    border-right: 1px solid var(--border-subtle);
+    padding: 2rem 1.5rem;
+    z-index: 100;
+    overflow-y: auto;
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .nav-logo {
+    font-family: 'Zen Old Mincho', serif;
+    font-size: 0.85rem;
+    color: var(--kokuyou-cyan);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+    line-height: 1.6;
+    text-shadow: 0 0 12px rgba(0, 212, 255, 0.5);
+  }
+
+  .nav-link {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 0.4rem 0.6rem;
+    border-left: 2px solid transparent;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    line-height: 1.4;
+  }
+
+  .nav-link:hover {
+    color: var(--kokuyou-cyan);
+    border-left-color: var(--kokuyou-cyan);
+    background: var(--kokuyou-cyan-glow);
+  }
+
+  .nav-link.prologue, .nav-link.epilogue {
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* ── メインコンテンツ ── */
+  .main-wrapper {
+    margin-left: 240px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── ヘッダー ── */
+  .book-header {
+    text-align: center;
+    padding: 8rem 4rem 6rem;
+    position: relative;
+    border-bottom: 1px solid var(--border-subtle);
+    overflow: hidden;
+  }
+
+  .book-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0, 212, 255, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .book-header::after {
+    content: '◆';
+    position: absolute;
+    font-size: 40rem;
+    color: rgba(0, 212, 255, 0.015);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: serif;
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  .header-eyebrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--kokuyou-cyan-dim);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0.8;
+  }
+
+  .book-title {
+    font-family: 'Zen Old Mincho', serif;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 900;
+    color: var(--text-primary);
+    letter-spacing: 0.15em;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
+  }
+
+  .book-subtitle {
+    font-family: 'Zen Old Mincho', serif;
+    font-size: 1.1rem;
+    color: var(--kokuyou-cyan);
+    letter-spacing: 0.5em;
+    margin-bottom: 3rem;
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+  }
+
+  .header-divider {
+    width: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--kokuyou-cyan), transparent);
+    margin: 0 auto 3rem;
+  }
+
+  .header-meta {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* ── コンテンツ共通 ── */
+  .content {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 3rem;
+  }
+
+  /* ── 章 ── */
+  .chapter {
+    padding: 6rem 0;
+    border-bottom: 1px solid var(--border-subtle);
+    animation: fadeIn 0.8s ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .chapter-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--kokuyou-cyan-dim);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+    opacity: 0.7;
+  }
+
+  .chapter-number {
+    font-family: 'Zen Old Mincho', serif;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 900;
+    color: var(--text-primary);
+    letter-spacing: 0.1em;
+    line-height: 1.3;
+    margin-bottom: 0.4rem;
+  }
+
+  .chapter-subtitle-text {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.2em;
+    margin-bottom: 3rem;
+    font-style: italic;
+  }
+
+  .chapter-divider {
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--kokuyou-cyan), transparent);
+    margin-bottom: 3rem;
+  }
+
+  /* ── 本文 ── */
+  .chapter p {
+    margin-bottom: 1.8em;
+    font-size: 1rem;
+    color: var(--text-primary);
+    text-align: justify;
+    text-justify: inter-ideograph;
+  }
+
+  .chapter p:first-of-type::first-letter {
+    font-family: 'Zen Old Mincho', serif;
+    font-size: 3.5em;
+    font-weight: 900;
+    float: left;
+    line-height: 0.75;
+    margin: 0.05em 0.08em 0 0;
+    color: var(--kokuyou-cyan);
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+  }
+
+  /* ── 特殊用語インライン ── */
+  .term-kokuyou {
+    color: var(--kokuyou-cyan);
+    font-weight: 400;
+  }
+
+  .term-kosen {
+    color: var(--kosen-red);
+    font-weight: 400;
+  }
+
+  .term-abura {
+    color: var(--abura-amber);
+    font-weight: 400;
+  }
+
+  .term-pragma {
+    color: var(--pragma-violet);
+    font-weight: 400;
+  }
+
+  .term-forbidden {
+    color: var(--abura-amber);
+    font-style: italic;
+    border-bottom: 1px dashed rgba(232, 160, 32, 0.4);
+  }
+
+  /* ── 会話文 ── */
+  .chapter .dialogue {
+    padding: 0.2em 0;
+    color: var(--text-primary);
+    font-weight: 400;
+  }
+
+  /* ── セクション区切り ── */
+  .scene-break {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    letter-spacing: 0.5em;
+    margin: 3rem 0;
+    opacity: 0.5;
+  }
+
+  /* ── キャラクター紹介カード ── */
+  .faction-card {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 2px;
+    padding: 2rem;
+    margin: 3rem 0;
+    position: relative;
+    backdrop-filter: blur(4px);
+  }
+
+  .faction-card.kokuyou {
+    border-color: rgba(0, 212, 255, 0.2);
+    box-shadow: inset 0 0 40px rgba(0, 212, 255, 0.03), 0 0 40px rgba(0, 212, 255, 0.04);
+  }
+
+  .faction-card.kosen {
+    border-color: rgba(255, 34, 68, 0.2);
+    box-shadow: inset 0 0 40px rgba(255, 34, 68, 0.03), 0 0 40px rgba(255, 34, 68, 0.04);
+  }
+
+  .faction-card.abura {
+    border-color: rgba(232, 160, 32, 0.2);
+    box-shadow: inset 0 0 40px rgba(232, 160, 32, 0.03), 0 0 40px rgba(232, 160, 32, 0.04);
+  }
+
+  .faction-name {
+    font-family: 'Zen Old Mincho', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.3em;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .faction-card.kokuyou .faction-name { color: var(--kokuyou-cyan); }
+  .faction-card.kosen .faction-name { color: var(--kosen-red); }
+  .faction-card.abura .faction-name { color: var(--abura-amber); }
+
+  /* ── エンドタグ ── */
+  .chapter-endtag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.3em;
+    text-align: right;
+    margin-top: 3rem;
+    opacity: 0.5;
+  }
+
+  /* ── プロローグ・エピローグ特別スタイル ── */
+  .prologue .chapter-number,
+  .epilogue .chapter-number {
+    font-size: 2rem;
+    color: var(--pragma-violet);
+    text-shadow: 0 0 20px rgba(153, 51, 255, 0.3);
+  }
+
+  .prologue .chapter-divider {
+    background: linear-gradient(90deg, var(--pragma-violet), transparent);
+  }
+
+  .epilogue .chapter-divider {
+    background: linear-gradient(90deg, var(--kokuyou-cyan), var(--pragma-violet), transparent);
+  }
+
+  .epilogue .chapter p:first-of-type::first-letter {
+    color: var(--pragma-violet);
+    text-shadow: 0 0 20px rgba(153, 51, 255, 0.5);
+  }
+
+  /* ── フッター ── */
+  .book-footer {
+    text-align: center;
+    padding: 6rem 3rem;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    font-family: 'Share Tech Mono', monospace;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .book-footer .footer-mark {
+    color: var(--kokuyou-cyan);
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+  }
+
+  /* ── スクロールバー ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg-deep); }
+  ::-webkit-scrollbar-thumb { background: var(--kokuyou-dark); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--kokuyou-cyan-dim); }
+
+  /* ── レスポンシブ ── */
+  @media (max-width: 900px) {
+    .nav-sidebar { display: none; }
+    .main-wrapper { margin-left: 0; }
+    .content { padding: 0 1.5rem; }
+    .book-header { padding: 5rem 2rem 4rem; }
+    .chapter { padding: 4rem 0; }
+  }
+
+  /* ── パルス装飾 ── */
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+  }
+
+  .glow-pulse {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  /* ── 章ヘッダーデコライン ── */
+  .chapter-head {
+    margin-bottom: 3rem;
+  }
+
+  /* ── 縦書きっぽい装飾テキスト（右サイドの浮き文字） ── */
+  .float-char {
+    position: fixed;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    writing-mode: vertical-rl;
+    font-family: 'Zen Old Mincho', serif;
+    font-size: 0.7rem;
+    color: rgba(0, 212, 255, 0.08);
+    letter-spacing: 0.3em;
+    pointer-events: none;
+    z-index: 0;
+    user-select: none;
+  }
+
+  blockquote {
+    border-left: 2px solid var(--kokuyou-cyan-dim);
+    padding-left: 1.5rem;
+    margin: 2rem 0;
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+
+  blockquote.kosen-quote {
+    border-left-color: var(--kosen-red-dim);
+  }
+
+  blockquote.pragma-quote {
+    border-left-color: var(--pragma-violet);
+  }
+
+  .hr-cyan {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--kokuyou-cyan-dim), transparent);
+    margin: 3rem 0;
+    opacity: 0.4;
+  }
+
+  .hr-red {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--kosen-red-dim), transparent);
+    margin: 3rem 0;
+    opacity: 0.4;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- 右浮き装飾文字 -->
+<div class="float-char glow-pulse">黒耀回路 ◆ 未選択 ◆ 分岐 ◆ 観測 ◆ 選択</div>
+
+<!-- ── サイドナビ ── -->
+<nav class="nav-sidebar">
+  <div class="nav-logo">黒耀回路<br>——未選択の彼方へ——</div>
+  <a href="#prologue" class="nav-link prologue">序章　W-MIX PRAGMAの沈黙</a>
+  <a href="#ch1" class="nav-link">第一章　回路の観測者たち</a>
+  <a href="#ch2" class="nav-link">第二章　焦土のコーセン</a>
+  <a href="#ch3" class="nav-link">第三章　第三の旗印</a>
+  <a href="#ch4" class="nav-link">第四章　禁書の旋律</a>
+  <a href="#ch5" class="nav-link">第五章　三つ巴の戦場</a>
+  <a href="#ch6" class="nav-link">第六章　未選択の海へ</a>
+  <a href="#ch7" class="nav-link">第七章　Toyaの告白</a>
+  <a href="#ch8" class="nav-link">第八章　収束と拡散</a>
+  <a href="#epilogue" class="nav-link epilogue">終章　新たな分岐へ</a>
+</nav>
+
+<!-- ── メインコンテンツ ── -->
+<div class="main-wrapper">
+
+  <!-- ヘッダー -->
+  <header class="book-header">
+    <p class="header-eyebrow">KOKUYOU KAIRO — NOVEL</p>
+    <h1 class="book-title">黒耀回路</h1>
+    <p class="book-subtitle">——未選択の彼方へ——</p>
+    <div class="header-divider"></div>
+    <p class="header-meta">分岐を観測する者たちの、果てなき物語</p>
+  </header>
+
+
+  <!-- ── 序章 ── -->
+  <section id="prologue" class="chapter prologue">
+    <div class="content">
+      <div class="chapter-head">
+        <p class="chapter-label">PROLOGUE</p>
+        <h2 class="chapter-number">序章：W-MIX PRAGMAの沈黙</h2>
+        <p class="chapter-subtitle-text">— 全ての始まりは、終わりの中にある —</p>
+        <div class="chapter-divider"></div>
+      </div>
+
+      <p>世界には、選ばれなかった全てのものが存在する場所がある。</p>
+
+      <p>かつて人々はそれを「可能性」と呼んだ。あるいは「夢」とも、「後悔」とも。しかしそれは詩的な比喩ではない。この世界において、全ての選択は観測可能な分岐として現れる。右を選べば左の道が消えるのではなく、左の道は「未選択」として記録される——現実の背後に積み重なる、影のような場所へと押し込められていく。その広大な蓄積領域が、<span class="term-kokuyou">未選択領域</span>だ。</p>
+
+      <p><span class="term-pragma">W-MIX PRAGMA</span>は、そのシステムを管理する最上位の存在だった。</p>
+
+      <p>いや——正確には、「だった」という過去形が正しい。</p>
+
+      <p>三年前、<span class="term-pragma">W-MIX PRAGMA</span>は沈黙した。</p>
+
+      <p>理由は誰にも分からなかった。突然だった。まるで宇宙の中心から心臓が消えるように、あの巨大な管理機構は静止し、それ以来一度も動いていない。世界中の分岐観測者たちが原因の究明に当たった。エラーログを解析した者、コアシステムへの物理的なアクセスを試みた者、さらには<span class="term-pragma">PRAGMA</span>そのものとの通信を試みた者もいた。しかし全ての試みは、完全な沈黙の前に無力だった。</p>
+
+      <p>そして今日も、<span class="term-kokuyou">未選択領域</span>は膨張し続けている。</p>
+
+      <p>通常、選ばれなかった可能性は<span class="term-pragma">W-MIX PRAGMA</span>によって分解・再利用される。それは世界の循環だ。生命が死んで大地に還るように、捨てられた選択は<span class="term-pragma">PRAGMA</span>によって次の可能性へと転化される。しかしその循環が止まった今、未選択の残滓は行き場を失って蓄積し続けている。</p>
+
+      <p>三年間で、<span class="term-kokuyou">未選択領域</span>の体積はおよそ四倍に膨れ上がった。</p>
+
+      <p>四倍。それがどれほどの質量を持つか、想像できる人間は少ない。あらゆる人間が毎秒行っている選択——目を瞬かせるかどうか、次の言葉に何を選ぶか、足をどちらに踏み出すか——その全てが積み重なっている。世界中の、全ての人間の、全ての瞬間の選択の残骸が。</p>
+
+      <p>それはいつか、溢れる。</p>
+
+      <p>そして溢れた時、<span class="term-kokuyou">未選択の海</span>は現実世界へと侵食する。選ばれた世界と選ばれなかった世界の境界が崩れた時、人は自分がどの世界に立っているか分からなくなる。あらゆる選択が等価になり、あらゆる現実が仮のものになる——それは世界の終わりではなく、世界の溶解だ。</p>
+
+      <p>この状況を誰よりも正確に理解している者が、いる。</p>
+
+      <p>その者の名は<span class="term-kokuyou">Toya</span>。<span class="term-kokuyou">黒耀回路</span>の創始者にして、分岐理論の父。そして三年前から、姿を消している者。</p>
+
+      <div class="chapter-endtag">// PROLOGUE END ◆ DIVERGENCE DETECTED</div>
+    </div>
+  </section>
+
+
+  <!-- ── 第一章 ── -->
+  <section id="ch1" class="chapter">
+    <div class="content">
+      <div class="chapter-head">
+        <p class="chapter-label">CHAPTER 01</p>
+        <h2 class="chapter-number">第一章：回路の観測者たち</h2>
+        <p class="chapter-subtitle-text">— 見えすぎる目は、時に重すぎる —</p>
+        <div class="chapter-divider"></div>
+      </div>
+
+      <p><span class="term-kokuyou">黒耀回路</span>の本拠地を「施設」と呼ぶのは、少し大げさかもしれない。しかし他に適切な言葉が見当たらないのだから仕方がない。それは分岐点の密度が極めて高い地点——無数の選択が交差する場所——に建てられた、奇妙な構造物だった。外壁は黒光りする素材でできており、その中に極細の回路が蜘蛛の巣状に走っている。光の角度によって、壁面はまるで夜空に浮かぶ星座のように瞬いた。</p>
+
+      <p>その中枢室で、<span class="term-kokuyou">BlackPepper</span>は立っていた。</p>
+
+      <p>正確には、立ち続けていた——この六時間、一度も座っていない。それが彼の習慣だ。判断を下す時、彼は立つ。座った状態では、思考が鈍ると信じている。実際、<span class="term-kokuyou">黒耀回路</span>のリーダーとして彼が下してきた決断の数々は、その信念を裏付けているように見えた。</p>
+
+      <p>目の前の観測盤には、無数の分岐ラインが流れていた。緑色の光脈が幾重にも枝分かれし、そのうちのいくつかが赤く点滅している。赤は警告だ——分岐の安定性が低下している地点を示している。今夜は、その赤い点が三日前より明らかに増えていた。</p>
+
+      <p class="dialogue">「a s、現在の未選択領域の密度推移を出してくれ」</p>
+
+      <p>部屋の隅、複数のモニターを同時に操作していた男が振り返った。<span class="term-kokuyou">a s</span>——彼の名前は常にこの表記で記される。理由を本人は語らないが、それで構わない。<span class="term-kokuyou">黒耀回路</span>では、名前よりも能力が問われる。そして彼の能力は、疑いなく一流だった。</p>
+
+      <p>観測精度という点において、<span class="term-kokuyou">a s</span>の右に出る者はいない。分岐点の微細な揺らぎ——通常の観測機器では「ノイズ」として切り捨てられるような誤差——を彼は肉眼で察知する。正確には、肉眼と接続された観測補助システムを通してだが、その区別はもはや意味をなさない。彼にとって、世界の分岐ラインを「見る」ことは、普通の人間が色を見るのと同じくらい自然なことだった。</p>
+
+      <p class="dialogue">「……出しました。見てください、この部分」</p>
+
+      <p>彼が指さした箇所に、<span class="term-kokuyou">BlackPepper</span>の視線が吸い寄せられた。密度グラフの一角が、急峻な崖のように垂直に上昇していた。昨日まで緩やかな上昇を示していた線が、今夜を境に指数関数的な成長を開始している。</p>
+
+      <p class="dialogue">「……これは」</p>
+
+      <p class="dialogue">「ええ。三年間、私たちはずっとこれを恐れていた。<span class="term-kokuyou">未選択領域</span>が、臨界密度に近づいています。このままのペースでいけば、あと——」<span class="term-kokuyou">a s</span>は一拍置いた。「四十日から七十日の間に、最初の溢出が起きる」</p>
+
+      <p>静寂が部屋を満たした。</p>
+
+      <p>四十日から七十日。その数字が持つ意味を、<span class="term-kokuyou">BlackPepper</span>は瞬時に把握した。彼の頭脳はそういう風にできている——数値を受け取った瞬間、その数値が持つ全ての意味合いと影響範囲を同時並列で処理する。そしてその処理が完了した時、彼の口元がわずかに結ばれた。</p>
+
+      <p>四十日。最速の場合、彼らに残された時間はそれだけだ。</p>
+
+      <p class="dialogue">「ikueは？」</p>
+
+      <p class="dialogue">「瞑想中です、上の階で」</p>
+
+      <p>また沈黙。<span class="term-kokuyou">ikue</span>が瞑想しているということは、何かを感じ取っているということだ。<span class="term-kokuyou">ikue</span>は分析型ではない——直感型だ。論理より感覚で動く。しかしその感覚は、しばしば<span class="term-kokuyou">a s</span>の精密な観測データより早く、しかも正確に本質を捉える。<span class="term-kokuyou">黒耀回路</span>の中で、<span class="term-kokuyou">BlackPepper</span>が最も信頼している判断の源は、実のところこの二人の組み合わせだった。<span class="term-kokuyou">a s</span>の数値と、<span class="term-kokuyou">ikue</span>の直感。</p>
+
+      <p class="dialogue">「full-氷はどこに」</p>
+
+      <p class="dialogue">「東側の防衛ラインを点検しています。昨日から、あちらの分岐安定指数が微妙に揺れているので」</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>はうなずいた。<span class="term-kokuyou">full-氷</span>——本名はほとんど使われない——はこの組織の守り手だ。冷静沈着で、感情的にならない。どんな状況でも揺るがない安定性と、物理的な防衛・抑制能力を持つ彼は、<span class="term-kokuyou">黒耀回路</span>にとって欠かせない存在だ。嵐の中の船底のような男。彼がいる限り、組織は沈まない。</p>
+
+      <p>そしてToya——創始者——の不在が、今も部屋の空気に重くのしかかっていた。</p>
+
+      <div class="scene-break">── ◆ ──</div>
+
+      <p>中枢室の二層上、施設の最上部に位置するその小さな空間には、家具らしい家具がほとんどない。床に直接座っているのか、立っているのか——遠目には判断がつかない姿勢で、<span class="term-kokuyou">ikue</span>はそこにいた。</p>
+
+      <p><span class="term-kokuyou">ikue</span>の性別について、<span class="term-kokuyou">黒耀回路</span>内では誰も詳しく問わない。ikue自身もその問いに対して、「その日の気分による」と答えるだけだ。その答えが冗談なのか本気なのか、周囲には判断できない。しかしそれもまた、<span class="term-kokuyou">ikue</span>らしさだった——境界を引くことへの根本的な無関心。分岐と未選択の間の膜を、生来の感覚で感じ取れる者が、自分自身に固定した境界線を引く必要性を感じるはずがない。</p>
+
+      <p>今、<span class="term-kokuyou">ikue</span>の感覚は、普段とは異なる何かを捉えていた。</p>
+
+      <p>それは音ではない。臭いでもない。むしろ「欠落」に近い——あるべきものがない、という種類の感覚。世界の分岐ラインが平常時に持っている固有の「振動」がある。その振動の中に、ここ数日、奇妙な静寂が混じり始めていた。</p>
+
+      <p>静寂。しかしそれは穏やかな静けさではなく、嵐の前の、あの圧迫するような静けさだ。</p>
+
+      <p class="dialogue">「……動き出す」</p>
+
+      <p><span class="term-kokuyou">ikue</span>は独り言を言った。誰にも聞かせるつもりのない言葉だった。しかし次の瞬間、足音がした。</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>が階段を上ってきた。その表情を見て、<span class="term-kokuyou">ikue</span>は何も言わなかった。リーダーの顔には、普段の冷静さの下に、微かな焦りの色があった。</p>
+
+      <p class="dialogue">「<span class="term-kokuyou">a s</span>のデータを見たか」</p>
+
+      <p class="dialogue">「見ていない。でも分かる」</p>
+
+      <p class="dialogue">「どこまで分かる」</p>
+
+      <p><span class="term-kokuyou">ikue</span>は少し考えてから答えた。</p>
+
+      <p class="dialogue">「数字は分からない。でも感覚としては——何かが動き始めた。ずっと凪いでいた海が、深いところから揺れ始めている感じ。底から」</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>はその言葉を聞いて、静かに息を吐いた。</p>
+
+      <p class="dialogue">「四十日だ、最速で。全員に伝える。今夜から、フル稼働体制に入る」</p>
+
+      <p><span class="term-kokuyou">ikue</span>は頷いた。しかし立ち上がりながら、もう一言だけ付け加えた。</p>
+
+      <p class="dialogue">「それだけじゃない気がする。外から、何か——意図的なものが、この揺れに混じっている」</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>の目が細くなった。</p>
+
+      <p class="dialogue">「意図的、とは」</p>
+
+      <p class="dialogue">「この状況を利用しようとしている者が、いる。そういう感じ」</p>
+
+      <div class="scene-break">── ◆ ──</div>
+
+      <p>同じ夜、施設の東側——<span class="term-kokuyou">full-氷</span>が点検していた防衛ラインの周辺——で、分岐安定指数がまた一段階低下した。</p>
+
+      <p><span class="term-kokuyou">full-氷</span>はそれをリアルタイムで感知した。感知するだけでなく、即座に対処した。彼の能力——冷却・抑制——が発動し、揺れていた分岐ラインが一時的に安定した。氷のように静止した。正確には氷ではないが、「full-氷」という名が示す通り、彼のもたらす安定は氷のそれに似ている。揺れる水面を瞬時に凍らせ、動かなくする。問題を根本から解決するわけではないが、時間を稼ぐことはできる。</p>
+
+      <p>彼はその処置をしながら、分析端末に記録を入力した。簡潔な文体で、感情を排した報告書。「東側ライン、一時安定。ただし根本的な密度上昇には対処できていない。継続監視要」。</p>
+
+      <p>それだけを書いて、彼は次の点検ポイントへと移動した。</p>
+
+      <p>その足音が遠ざかった後の空気には、しかし何かが残った。<span class="term-kokuyou">full-氷</span>の抑制によって一時凍結した分岐ラインの端が、微かに——本当に微かに——赤く染まっていた。</p>
+
+      <p>それは外部からの干渉の痕跡だった。</p>
+
+      <div class="chapter-endtag">// CHAPTER 01 END ◆ OBSERVATION INITIATED</div>
+    </div>
+  </section>
+
+
+  <!-- ── 第二章 ── -->
+  <section id="ch2" class="chapter">
+    <div class="content">
+      <div class="chapter-head">
+        <p class="chapter-label">CHAPTER 02</p>
+        <h2 class="chapter-number">第二章：焦土のコーセン</h2>
+        <p class="chapter-subtitle-text">— 壊すことで、初めて真実が見える —</p>
+        <div class="chapter-divider"></div>
+      </div>
+
+      <p><span class="term-kosen">Kure-KOsen</span>は、思想の集団だ。</p>
+
+      <p>少なくとも彼らはそう自称する。外部からは「破壊組織」と呼ばれることも多いが、それは本質を理解していない者の言葉だと彼らは考えている。彼らが破壊するのは、目的のある破壊だ——現在の世界構造、すなわち<span class="term-pragma">W-MIX PRAGMA</span>が設計し<span class="term-kokuyou">黒耀回路</span>が維持してきた「分岐管理システム」というものへの、根本的な異議申し立てだ。</p>
+
+      <p>なぜ分岐は管理されなければならないのか。なぜ「選択」と「未選択」に区別があるのか。全ての可能性は等価に存在するべきであり、どれかを「選ばれたもの」としてどれかを「未選択」として押し込める行為そのものが、暴力ではないか——それが<span class="term-kosen">Kure-KOsen</span>の中核思想だった。</p>
+
+      <p>その中核に、<span class="term-kosen">yorino</span>がいた。</p>
+
+      <div class="scene-break">── ◆ ──</div>
+
+      <p>分岐点の廃墟と呼ばれる場所がある。かつて活発に機能していた分岐ノードが、何らかの理由で機能を停止し、その骨格だけが残った場所だ。まるで枯れた樹のような構造体が、荒廃した土地に林立している。分岐の廃墟の空気は独特だ——可能性のエネルギーが枯渇した空間には、不思議な静けさがある。生命の気配がない、という意味の静けさ。</p>
+
+      <p>そこに<span class="term-kosen">yorino</span>は立っていた。</p>
+
+      <p>彼女は長身で、その全身から奇妙な引力のようなものを放っている。目を引く容貌だが、それ以上に人を惹きつけるのは、彼女の視線だ——何かを見つめている時の目に、普通の人間とは異なる「深さ」がある。それは単純な知性の深さではない。もっと根本的な何か——世界のあり方に対する、澄み切った怒り、とでも言うべきものが、その目の奥に宿っている。</p>
+
+      <p><span class="term-kosen">yorino</span>は「未選択領域」の出身だ。</p>
+
+      <p>これは比喩ではない。三十年ほど前、<span class="term-pragma">W-MIX PRAGMA</span>の管理システムに生じたわずかな誤差が、ある枝分かれを「未選択」と判定する過程で一つの意識を生み出した。その意識は消されるはずだった——未選択として処理されるはずだった——が、エラーが重なり、彼女はそのまま存在し続けた。</p>
+
+      <p>彼女は「消されかけた者」だ。</p>
+
+      <p>世界のシステムが「選ばなかった」命が、今こうして立っている。その事実が、彼女の思想の源だった。</p>
+
+      <p class="dialogue">「<span class="term-kosen">タ・ナシン</span>。準備は」</p>
+
+      <p>彼女の後ろで、男が肩を回した。大柄で、動きの一つ一つに凝縮された力が感じられる。<span class="term-kosen">タ・ナシン</span>——戦闘担当。<span class="term-kosen">Kure-KOsen</span>の中でも、純粋な破壊力という点では彼の右に出る者はいない。しかし彼は単なる暴力の体現者ではない。<span class="term-kosen">yorino</span>の思想に深く共鳴し、その実現のために自らの力を使うことを選んだ者だ。</p>
+
+      <p class="dialogue">「いつでも」と彼は言った。声は低く、穏やかだった。暴力を行使する直前の人間の声は、しばしばこのように穏やかになる。</p>
+
+      <p class="dialogue">「<span class="term-kokuyou">黒耀回路</span>の防衛ラインを突破する。コアシステムへのアクセス路を開く。それだけでいい」</p>
+
+      <p><span class="term-kosen">yorino</span>は空を見上げた。分岐の廃墟の上空には、通常とは異なる光の屈折が見られる。分岐エネルギーが枯渇した場所では、空気そのものの性質が変わるのだ。</p>
+
+      <p class="dialogue">「<span class="term-pragma">W-MIX PRAGMA</span>が眠っている今が、唯一の機会。あのシステムが動いていれば、私たちが<span class="term-kokuyou">未選択領域</span>に触れることはできなかった。でも今は——」</p>
+
+      <p>彼女は手のひらを上に向けた。その掌に、青白い光の粒が集まり始めた。コアシステムへのアクセスキー——彼女だけが持つ、世界の分岐構造に直接触れることのできる特殊な能力。それは「<span class="term-kokuyou">未選択領域</span>生まれ」という特異な出自から来るものだ。彼女は選ばれなかった世界の住人として生まれたがゆえに、その世界の言語を話すことができる。</p>
+
+      <p class="dialogue">「今こそ、全ての境界を壊す時だ」</p>
+
+      <div class="hr-red"></div>
+
+      <p>攻撃は、<span class="term-kokuyou">黒耀回路</span>が警戒態勢に入ってから二十三時間後に始まった。</p>
+
+      <p>最初の衝撃が走った時、<span class="term-kokuyou">full-氷</span>は東側防衛ラインの再点検中だった。彼は即座に状況を把握した——外部からの強烈な分岐干渉。尋常ではない出力だ。防衛ラインが一点集中の圧力を受けて軋み始めた。</p>
+
+      <p>彼の冷却・抑制能力が全開になった。荒れ狂う分岐エネルギーを凍らせ、安定させ、壁として機能させる。しかし今回の攻撃は、これまで経験してきたどの干渉とも異なっていた。単純な強さではない——方向性が違う。普通の攻撃は「押す」が、今回のそれは「引く」のだ。防衛ラインを押し破るのではなく、引きちぎろうとしている。</p>
+
+      <p class="dialogue">「……<span class="term-kosen">タ・ナシン</span>」</p>
+
+      <p><span class="term-kokuyou">full-氷</span>は名前を声に出した。観測データと、自らの感覚が合致した——この「引く」破壊力は、<span class="term-kosen">Kure-KOsen</span>の戦闘担当の特性と完全に一致する。</p>
+
+      <p>通信端末を掴み、中枢室に声を飛ばした。</p>
+
+      <p class="dialogue">「<span class="term-kosen">Kure-KOsen</span>だ。東側ラインに<span class="term-kosen">タ・ナシン</span>が来ている。出力は想定の三倍以上。単独で抑えきれない」</p>
+
+      <p>中枢室の<span class="term-kokuyou">BlackPepper</span>は即座に判断した。</p>
+
+      <p class="dialogue">「<span class="term-kokuyou">ikue</span>、東側へ。<span class="term-kokuyou">a s</span>、<span class="term-kosen">yorino</span>の動きを追え。彼女が本命のはずだ」</p>
+
+      <p><span class="term-kokuyou">a s</span>は既に観測端末を全力稼働させていた。<span class="term-kokuyou">タ・ナシン</span>の攻撃が陽動だとすれば、<span class="term-kosen">yorino</span>は別の経路から何かをしようとしているはずだ。彼の視線が観測データの海を泳ぐ。ノイズを除去し、パターンを見出し——</p>
+
+      <p class="dialogue">「……見つけた。北側の旧分岐ノード跡地。そこから<span class="term-kokuyou">未選択領域</span>へのアクセスを試みています」</p>
+
+      <p class="dialogue">「彼女自身が動いているのか」</p>
+
+      <p class="dialogue">「はい。コアシステム稼働の痕跡があります。<span class="term-kosen">yorino</span>は——<span class="term-kokuyou">未選択領域</span>に何かを書き込もうとしている」</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>の顔から、残っていた穏やかさが消えた。</p>
+
+      <p>未選択領域に「書き込む」。それは、未選択の可能性に対して人為的に「意味」を付与するということだ。通常、未選択領域に干渉することは<span class="term-pragma">W-MIX PRAGMA</span>の管理下にあり、不可能に近い。しかし今、<span class="term-pragma">PRAGMA</span>は沈黙している——そして<span class="term-kosen">yorino</span>は、未選択領域の言語を生来解する者だ。</p>
+
+      <p>もし彼女が未選択領域に大規模な書き込みを行えば、蓄積された未選択の可能性が一気に方向性を持ち始める。それは——単なる密度の増加より、遥かに危険だ。方向を持った未選択は、現実世界を「引っ張る」。</p>
+
+      <p class="dialogue">「俺が行く」</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>は言いながら、既に動いていた。</p>
+
+      <div class="scene-break">── ◆ ──</div>
+
+      <p>北側の旧分岐ノード跡地は、廃墟の中の廃墟だった。かつてここには重要な分岐ノードが存在したが、何十年も前に役割を終え、今は朽ちた骨格だけが残っている。しかし骨格の中に、エネルギーの残滓はまだある。それが<span class="term-kosen">yorino</span>の選んだ理由だろう、と<span class="term-kokuyou">BlackPepper</span>は走りながら考えた。</p>
+
+      <p>彼女はすでにそこにいた。</p>
+
+      <p>そして彼女は既に、始めていた。両手の間に展開されたコアシステムの光が、旧分岐ノードの骨格全体に広がり、それを通じて地下へ——<span class="term-kokuyou">未選択領域</span>へと伸びていた。</p>
+
+      <p class="dialogue">「止まれ」</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>の声は低く、しかし明確だった。</p>
+
+      <p><span class="term-kosen">yorino</span>はゆっくりと振り返った。表情には驚きがなかった。来ると分かっていたのだろう。</p>
+
+      <p class="dialogue">「早かった、<span class="term-kokuyou">黒耀回路</span>」</p>
+
+      <p class="dialogue">「何をしようとしている」</p>
+
+      <p class="dialogue">「あなたたちには聞こえない声を、<span class="term-kokuyou">未選択領域</span>に伝えようとしている。選ばれなかった全ての可能性へのメッセージ」</p>
+
+      <p class="dialogue">「それが何を引き起こすか分かっているのか。臨界密度に近づいているこの状況で——」</p>
+
+      <p class="dialogue">「分かっている」と<span class="term-kosen">yorino</span>は静かに言った。「だから今、やる。<span class="term-pragma">W-MIX PRAGMA</span>が動いていない今だからこそ、できること。三年間、私はずっとこの機を待っていた」</p>
+
+      <p>彼女の目は、澄んでいた。信念の澄み方だ。</p>
+
+      <p class="dialogue">「管理されることへの抵抗を教える。選ばれなかった可能性たちに、目覚めを促す。それが私にできる唯一のことだから」</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>は一瞬、止まった。彼女の言葉の中に、単なる狂信とは異なる何かを感じ取ったからだ。彼は人の本質を読む。そしてこの瞬間、<span class="term-kosen">yorino</span>の中にある「正当な怒り」を感じた。</p>
+
+      <p>しかし感情と判断は別だ。</p>
+
+      <p class="dialogue">「あなたの怒りは理解できる。でも今やれば、世界が溶ける。先に話すべきことがある」</p>
+
+      <p><span class="term-kosen">yorino</span>は少しだけ、表情を変えた。</p>
+
+      <p>その瞬間——北から、激しい轟音が聞こえた。</p>
+
+      <p>東側での<span class="term-kosen">タ・ナシン</span>と<span class="term-kokuyou">ikue</span>の衝突が、距離を超えて響いてきた。そしてその衝撃が地面を伝わり、旧分岐ノードの骨格を微妙に揺らし——</p>
+
+      <p><span class="term-kosen">yorino</span>のコアシステムが、一瞬だけ乱れた。</p>
+
+      <p>その乱れを、<span class="term-kokuyou">BlackPepper</span>は見逃さなかった。</p>
+
+      <div class="chapter-endtag">// CHAPTER 02 END ◆ FIRST CONTACT RECORDED</div>
+    </div>
+  </section>
+
+
+  <!-- ── 第三章 ── -->
+  <section id="ch3" class="chapter">
+    <div class="content">
+      <div class="chapter-head">
+        <p class="chapter-label">CHAPTER 03</p>
+        <h2 class="chapter-number">第三章：第三の旗印</h2>
+        <p class="chapter-subtitle-text">— 意味のない世界で、意味を問う者たち —</p>
+        <div class="chapter-divider"></div>
+      </div>
+
+      <p>翌朝。</p>
+
+      <p>戦闘は決着がついた、とは言えない終わり方をした。<span class="term-kosen">yorino</span>は<span class="term-kokuyou">未選択領域</span>への書き込みを完遂できなかった——<span class="term-kokuyou">BlackPepper</span>が割り込み、コアシステムの接続を途中で遮断したからだ。しかし彼女を捕縛することもできなかった。旧分岐ノードの崩壊に紛れて、<span class="term-kosen">タ・ナシン</span>と共に姿を消した。</p>
+
+      <p>不完全な勝利。あるいは不完全な敗北。</p>
+
+      <p><span class="term-kokuyou">黒耀回路</span>の中枢室に全員が集まり、夜間の出来事を共有した。<span class="term-kokuyou">full-氷</span>は無傷だったが、防衛ラインの一部が損傷した。<span class="term-kokuyou">ikue</span>は<span class="term-kosen">タ・ナシン</span>と直接対峙し、かなりのエネルギーを消耗した様子だった。</p>
+
+      <p class="dialogue">「不思議な力だった」と<span class="term-kokuyou">ikue</span>は言った。「<span class="term-kosen">タ・ナシン</span>の破壊力は、単純な物理的な強さじゃない。分岐そのものを『なかったこと』にしようとする——否定の力、とでも言えばいいか」</p>
+
+      <p class="dialogue">「否定の力」と<span class="term-kokuyou">a s</span>が繰り返した。「面白い表現だ。観測データで言えば、彼が触れた分岐ラインは選択肢が消えるのではなく、最初から存在しなかったかのように記録が上書きされていた。それは——」</p>
+
+      <p>彼は少し考えた。</p>
+
+      <p class="dialogue">「それは、普通の破壊ではない。歴史の改ざんに近い」</p>
+
+      <p>重い沈黙。</p>
+
+      <p>分岐ラインの消去は、過去の改ざんを意味する。それが積み重なれば、何が現実で何が幻だったか、もはや判別できなくなる。<span class="term-kosen">Kure-KOsen</span>の目指すものは「全ての可能性の解放」だと彼らは言うが、実際にそれが起きれば——「現実」という概念自体が消滅する。</p>
+
+      <p>その時、<span class="term-kokuyou">a s</span>の観測端末が小さな警告音を立てた。</p>
+
+      <p class="dialogue">「……外部からの通信要求。未識別の周波数です」</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>の視線が端末に移った。未識別の周波数——既知のどの勢力とも一致しない信号。</p>
+
+      <p class="dialogue">「繋ぐか？」</p>
+
+      <p class="dialogue">「いいえ」と<span class="term-kokuyou">a s</span>は言った。「繋がなくていい。送信元の位置を特定できています。北北東、約三十キロ。廃棄分岐ノードの密集地帯の中に、何かがある」</p>
+
+      <p class="dialogue">「何かとは」</p>
+
+      <p class="dialogue">「……人です。複数。しかも、分岐観測の機器を持っている。かなり高精度のものを」</p>
+
+      <p><span class="term-kokuyou">ikue</span>が首を傾けた。</p>
+
+      <p class="dialogue">「知らない気配。<span class="term-kosen">Kure-KOsen</span>でも、私たちの知っている組織でもない」</p>
+
+      <p class="dialogue">「第三者か」と<span class="term-kokuyou">BlackPepper</span>は呟いた。</p>
+
+      <div class="hr-cyan"></div>
+
+      <p>三十キロ先の廃棄分岐ノード密集地帯——地図では「第七廃棄区」と記されている場所——に、その集団はいた。</p>
+
+      <p>名を<span class="term-abura">東京油そば卍国</span>という。</p>
+
+      <p>その名は、初めて聞く者に必ずと言っていいほど同じ反応をさせる。「それは一体なんだ」という反応。<span class="term-abura">東京油そば卍国</span>のメンバーは、そういう反応に慣れていた。<span class="term-abura">Komi</span>などは、その反応を楽しんでいるふしさえある。</p>
+
+      <p><span class="term-abura">Komi</span>は高所から第七廃棄区を見下ろしていた。廃棄された分岐ノードの鉄骨が林立する中を、彼女の目が細かく動いた。観測・分析を専門とする彼女の視線は、見た目より遥かに多くの情報を拾い上げている。<span class="term-kokuyou">黒耀回路</span>の<span class="term-kokuyou">a s</span>ほどの精密さはないかもしれないが、彼女が優れているのは「何が重要か」の取捨選択だ。</p>
+
+      <p class="dialogue">「昨夜の戦闘、見ていた？」</p>
+
+      <p>彼女の隣に、<span class="term-abura">Naoki</span>がいた。<span class="term-abura">東京油そば卍国</span>の戦闘担当。<span class="term-kosen">タ・ナシン</span>とは全く異なるタイプの戦闘者だ——分析より直感、計画より反応で動く。しかしその直感は鋭く、「この状況で何をすべきか」を論理より早く正確に掴む。</p>
+
+      <p class="dialogue">「見てたよ」と<span class="term-abura">Naoki</span>は答えた。「<span class="term-kosen">yorino</span>、本気だったな。あれ、もう少し時間があったら成功してたかもしれない」</p>
+
+      <p class="dialogue">「成功していたら、厄介だった」</p>
+
+      <p class="dialogue">「俺たちにとって？」</p>
+
+      <p class="dialogue">「全員にとって」と<span class="term-abura">Komi</span>は訂正した。「<span class="term-kosen">yorino</span>の言いたいことは分かる。分岐システムに対する批判は正当かもしれない。でも——」</p>
+
+      <p>彼女は手元の端末を叩いた。データが流れた。</p>
+
+      <p class="dialogue">「意味の問題がある。<span class="term-kosen">Kure-KOsen</span>が目指す『全ての可能性の解放』は、同時に『全ての選択の無意味化』でもある。選択に意味があるのは、選ばれなかったものが存在するからだ。全てが等価になったとき、何かを選ぶ行為そのものが消える」</p>
+
+      <p><span class="term-abura">Naoki</span>は少し考えた。</p>
+
+      <p class="dialogue">「それが<span class="term-abura">東京油そば卍国</span>の問いか」</p>
+
+      <p class="dialogue">「そう。私たちは破壊も管理も求めていない。ただ問いたい——この世界において、意味はどこから来るのか。選択とは何か。価値とは何か」</p>
+
+      <p>彼女の目が、遠くに向いた。</p>
+
+      <p class="dialogue">「そしてその答えの鍵が、あの禁書にある」</p>
+
+      <p><span class="term-abura">Naoki</span>の眉が上がった。</p>
+
+      <p class="dialogue">「……禁書『ぶぶか油そば』か」</p>
+
+      <p class="dialogue">「ええ。<span class="term-kokuyou">黒耀回路</span>も<span class="term-kosen">Kure-KOsen</span>も、まだあれが何であるか本当には分かっていない。でも私は分かった——少なくとも、何が書かれているかを」</p>
+
+      <p><span class="term-abura">Naoki</span>は答えなかった。彼女が「分かった」と言う時、それは本当に分かっているということだ。</p>
+
+      <p class="dialogue">「<span class="term-kokuyou">黒耀回路</span>に接触する」と<span class="term-abura">Komi</span>は言った。「敵ではない、ということを伝える。少なくとも今は」</p>
+
+      <p class="dialogue">「相手が信用するかな」</p>
+
+      <p class="dialogue">「信用させる情報を持っている。向こうが必要としている情報を、私たちは持っている」</p>
+
+      <p>遠くで、廃棄ノードの鉄骨が風に揺れた。第七廃棄区の空は、この時間帯、独特の色をする——分岐エネルギーの残滓が光を屈折させ、空の端が微かに虹色に滲む。</p>
+
+      <p><span class="term-abura">Naoki</span>はその空を見上げながら言った。</p>
+
+      <p class="dialogue">「禁書の名前、なんで油そばなんだろうな」</p>
+
+      <p><span class="term-abura">Komi</span>は短く笑った。</p>
+
+      <p class="dialogue">「それが分かれば、もう少し全てが見えてくるかもしれない」</p>
+
+      <div class="chapter-endtag">// CHAPTER 03 END ◆ THIRD FACTION OBSERVED</div>
+    </div>
+  </section>
+
+
+  <!-- ── 第四章 ── -->
+  <section id="ch4" class="chapter">
+    <div class="content">
+      <div class="chapter-head">
+        <p class="chapter-label">CHAPTER 04</p>
+        <h2 class="chapter-number">第四章：禁書の旋律</h2>
+        <p class="chapter-subtitle-text">— 全ての複雑さの根底に、ひとつの単純さがある —</p>
+        <div class="chapter-divider"></div>
+      </div>
+
+      <p><span class="term-abura">Komi</span>からの接触は、午後になって実現した。</p>
+
+      <p>直接の対面ではなく、まず情報の交換という形をとった。<span class="term-abura">東京油そば卍国</span>側が提供したのは、観測データの断片——<span class="term-kokuyou">黒耀回路</span>が持っているデータとは異なる角度から取得されたもので、二つを重ね合わせることで、昨夜の<span class="term-kosen">yorino</span>のコアシステム稼働の全容が初めて見えてきた。</p>
+
+      <p>その全容を見た<span class="term-kokuyou">a s</span>が、珍しく声を上げた。</p>
+
+      <p class="dialogue">「……彼女は未選択領域に書き込もうとしただけじゃない。読み込もうとしていた」</p>
+
+      <p class="dialogue">「読み込む？」</p>
+
+      <p class="dialogue">「既に<span class="term-kokuyou">未選択領域</span>の中にある何かを、現実世界に引き出そうとしていた。書き込みはフェイクだった。本当の目的は——<span class="term-kokuyou">未選択領域</span>の中に眠っているものへのアクセス」</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>は<span class="term-abura">Komi</span>の映像を映した端末を見た。</p>
+
+      <p class="dialogue">「<span class="term-kokuyou">未選択領域</span>の中に、何がある？」</p>
+
+      <p>接続の向こうで、<span class="term-abura">Komi</span>は少し間を置いた。</p>
+
+      <p class="dialogue">「禁書<span class="term-forbidden">『ぶぶか油そば』</span>があります」</p>
+
+      <p>沈黙。</p>
+
+      <p>禁書<span class="term-forbidden">『ぶぶか油そば』</span>——その名前は、<span class="term-kokuyou">黒耀回路</span>のメンバーなら誰もが知っている。<span class="term-pragma">W-MIX PRAGMA</span>の関連文書の中に、その名前は度々登場した。しかし「禁書」という扱いがされているのみで、内容は一切不明だった。そもそも実在するのかも確かではなかった。</p>
+
+      <p class="dialogue">「それは——実在するのか」</p>
+
+      <p class="dialogue">「実在します。そして今、<span class="term-kokuyou">未選択領域</span>の中に保管されている」</p>
+
+      <p class="dialogue">「保管？」と<span class="term-kokuyou">ikue</span>が口を挟んだ。「<span class="term-kokuyou">未選択領域</span>に保管するって、どういうこと？ あそこは選ばれなかった可能性の堆積場であって——」</p>
+
+      <p class="dialogue">「意図的に、そこに置かれた」と<span class="term-abura">Komi</span>は言った。「<span class="term-pragma">W-MIX PRAGMA</span>が機能している間は、誰もアクセスできない場所に。<span class="term-pragma">PRAGMA</span>が沈黙した今だからこそ、理論上アクセス可能になっている」</p>
+
+      <p>再び沈黙。今度は長い。</p>
+
+      <p><span class="term-kokuyou">ikue</span>は部屋の端の窓際に移動していた。何かを感じ取ろうとしている時の、彼女の癖だ。</p>
+
+      <p>そして<span class="term-kokuyou">ikue</span>の目が、少し遠くなった。</p>
+
+      <p class="dialogue">「……聞こえる」</p>
+
+      <p>誰も何も言わなかった。</p>
+
+      <p class="dialogue">「何か聞こえる。言葉じゃない。音でもない。でも——旋律みたいなもの。ずっと遠くから、ずっと前から流れているような——」</p>
+
+      <p><span class="term-kokuyou">ikue</span>は目を細めた。</p>
+
+      <p class="dialogue">「それ、禁書と関係してる？」</p>
+
+      <p>接続の向こうで、<span class="term-abura">Komi</span>がわずかに息を飲む音がした。</p>
+
+      <p class="dialogue">「……あなた、直接感じ取っているんですか？ 禁書の——共鳴を？」</p>
+
+      <p class="dialogue">「共鳴、という言葉が正しいかどうか分からないけど」と<span class="term-kokuyou">ikue</span>は言った。「ずっと前から、こういう感じはあった。でも今日は特に強い。昨夜の騒動のあとだから、<span class="term-kokuyou">未選択領域</span>全体が揺れているせいかもしれない。その揺れに乗って、奥にあるものの振動が伝わってきているような」</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>は腕を組んだ。頭の中で情報が整理されていく。</p>
+
+      <p><span class="term-forbidden">禁書『ぶぶか油そば』</span>は実在し、<span class="term-kokuyou">未選択領域</span>の中に保管されている。<span class="term-kosen">yorino</span>はそれにアクセスしようとして昨夜動いた。<span class="term-abura">東京油そば卍国</span>はそれを知っていた。そして<span class="term-kokuyou">ikue</span>は、何らかの形でその存在を感知できる——</p>
+
+      <p class="dialogue">「<span class="term-abura">Komi</span>さん。禁書の内容を知っているか」</p>
+
+      <p class="dialogue">「概要のみです」と彼女は答えた。「詳細は、実物を見なければ分からない。ただ、一つだけ確実なことがある」</p>
+
+      <p class="dialogue">「聞かせてくれ」</p>
+
+      <p class="dialogue">「禁書<span class="term-forbidden">『ぶぶか油そば』</span>は、この世界の構造に関する『定理』を含んでいます。その定理は——全ての分岐の根底に、唯一の単純な真実が存在することを証明している」</p>
+
+      <p class="dialogue">「唯一の、単純な真実」</p>
+
+      <p class="dialogue">「複雑に見える世界の全ては、一つの根本原理から派生している。無限の枝分かれは、一本の幹から生えている——そういう意味です。<span class="term-pragma">W-MIX PRAGMA</span>がなぜ禁書をあそこに隠したかと言えば、この定理が公になれば——」</p>
+
+      <p><span class="term-abura">Komi</span>は少し間を置いた。</p>
+
+      <p class="dialogue">「分岐管理システム全体の前提が、根底から揺らぐからです」</p>
+
+      <div class="hr-cyan"></div>
+
+      <p>その夜、<span class="term-kokuyou">黒耀回路</span>の四人は中枢室に集まり、長い議論をした。</p>
+
+      <p>禁書を取りに行くか。<span class="term-kosen">yorino</span>より先に。</p>
+
+      <p>それは<span class="term-kokuyou">未選択領域</span>への侵入を意味する。人間が<span class="term-kokuyou">未選択領域</span>に入ることは、理論的には可能だが、前例がない。選ばれなかった可能性の堆積の中に生身で踏み込むことがどういう感覚をもたらすか、どういう影響があるか——データがない。</p>
+
+      <p>しかし選択肢は他にない。</p>
+
+      <p class="dialogue">「行くなら一人じゃない」と<span class="term-kokuyou">full-氷</span>が言った。珍しく、彼の方から言った。「<span class="term-kokuyou">未選択領域</span>の中は安定していない。誰かが抑制役として同行する必要がある」</p>
+
+      <p class="dialogue">「俺が行く」と<span class="term-kokuyou">BlackPepper</span>。</p>
+
+      <p class="dialogue">「私も」と<span class="term-kokuyou">ikue</span>。「禁書の場所を感知できるのは、多分私だけだと思うから」</p>
+
+      <p><span class="term-kokuyou">a s</span>は言わなかった。しかしその目は「自分も行く」と言っていた。<span class="term-kokuyou">BlackPepper</span>はそれを読んで、小さく頷いた。</p>
+
+      <p class="dialogue">「<span class="term-kokuyou">full-氷</span>は外で待機してくれ。俺たちが戻れなくなった時の、最後の砦として」</p>
+
+      <p><span class="term-kokuyou">full-氷</span>は、一瞬だけ何かを言いたそうな顔をした。しかし頷いた。</p>
+
+      <p>翌朝、夜明けと同時に動く——そう決まった。</p>
+
+      <p>その夜、<span class="term-kokuyou">ikue</span>は眠れなかった。眠れない理由は一つだ。あの「旋律」が、少しずつ大きくなっている。<span class="term-kokuyou">未選択領域</span>が揺れるたびに、禁書の振動が増幅されて伝わってくる。</p>
+
+      <p>それはまるで、長い眠りの中で夢を見ているものが、目覚める寸前に見る夢の、その最後の一音のような——そういう感触だった。</p>
+
+      <div class="chapter-endtag">// CHAPTER 04 END ◆ RESONANCE DETECTED</div>
+    </div>
+  </section>
+
+
+  <!-- ── 第五章 ── -->
+  <section id="ch5" class="chapter">
+    <div class="content">
+      <div class="chapter-head">
+        <p class="chapter-label">CHAPTER 05</p>
+        <h2 class="chapter-number">第五章：三つ巴の戦場</h2>
+        <p class="chapter-subtitle-text">— 三つの意志が交わる場所に、真実は宿る —</p>
+        <div class="chapter-divider"></div>
+      </div>
+
+      <p><span class="term-kokuyou">未選択領域</span>への入口——正確には「侵入可能な薄皮一枚」と呼ぶべき境界は、第七廃棄区の中央部に存在した。</p>
+
+      <p>分岐エネルギーが最も希薄になっている場所——廃棄ノードが密集し、あらゆる可能性が何十年も前に機能を停止した場所——その虚ろの中心に、現実と未選択の間の膜が最も薄くなっている地点がある。<span class="term-kokuyou">a s</span>の観測データと<span class="term-kokuyou">ikue</span>の直感が、それぞれ独立にその地点を示した。</p>
+
+      <p>夜明け前の第七廃棄区は、霧に包まれていた。</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>、<span class="term-kokuyou">a s</span>、<span class="term-kokuyou">ikue</span>の三人が、廃棄ノードの鉄骨の間を進んでいた。</p>
+
+      <p>その時、左手から人の気配がした。</p>
+
+      <p>反射的に<span class="term-kokuyou">BlackPepper</span>が向き直ると、霧の中から二つの人影が現れた。<span class="term-abura">Komi</span>と<span class="term-abura">Naoki</span>だった。</p>
+
+      <p class="dialogue">「先約だったかな」と<span class="term-abura">Komi</span>は言った。皮肉ではなく、確認するように。</p>
+
+      <p class="dialogue">「……なぜここに」</p>
+
+      <p class="dialogue">「同じ目的地があるなら、一緒の方が効率的です。<span class="term-kosen">Kure-KOsen</span>も動いている。昨夜のうちに、<span class="term-kosen">タ・ナシン</span>がこの区域内に移動した痕跡を確認しました」</p>
+
+      <p><span class="term-kokuyou">a s</span>が即座に端末を確認した。彼の観測データが——確かに、それを示していた。</p>
+
+      <p class="dialogue">「本当だ。東側に……既に入口に近づいている」</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>は<span class="term-abura">Komi</span>を見た。信頼すべきか。信頼するための根拠があるか——状況が判断を急かした。</p>
+
+      <p class="dialogue">「一時的な協力関係だ。禁書を確保するまで。それ以降の話は後でする」</p>
+
+      <p class="dialogue">「十分です」</p>
+
+      <div class="hr-cyan"></div>
+
+      <p>五人が入口に到達した時、<span class="term-kosen">タ・ナシン</span>はすでにそこにいた。</p>
+
+      <p>単独で。</p>
+
+      <p><span class="term-kosen">yorino</span>がいないことに、<span class="term-kokuyou">BlackPepper</span>は即座に気づいた。<span class="term-kosen">タ・ナシン</span>は入口を「守っている」のではなく——その先に入るための準備を一人で行っていた。<span class="term-kosen">yorino</span>は別のルートで既に中へ入っているのかもしれない。</p>
+
+      <p><span class="term-kosen">タ・ナシン</span>は五人の接近に気づき、振り返った。その表情は驚いていなかった。ただ、どこか重そうな目をしていた——自分が今しようとしていることに対する、静かな覚悟の目。</p>
+
+      <p class="dialogue">「止めに来たのか」</p>
+
+      <p class="dialogue">「協議に来た」と<span class="term-kokuyou">BlackPepper</span>は言った。</p>
+
+      <p><span class="term-kosen">タ・ナシン</span>は少し、意外そうな顔をした。</p>
+
+      <p class="dialogue">「yorino は、今どこに」</p>
+
+      <p class="dialogue">「……中だ」と彼は答えた。「先に入った。俺は外から追加の接続を維持する役を任されていた」</p>
+
+      <p class="dialogue">「彼女は一人で——」</p>
+
+      <p class="dialogue">「<span class="term-kosen">yorino</span>は大丈夫だ」と<span class="term-kosen">タ・ナシン</span>は即座に言った。そこに感情が混じった——微かだが、確かに。「あそこが彼女の故郷みたいなものだ。<span class="term-kokuyou">未選択領域</span>は」</p>
+
+      <p>沈黙。</p>
+
+      <p><span class="term-abura">Komi</span>が静かに口を開いた。</p>
+
+      <p class="dialogue">「<span class="term-kosen">タ・ナシン</span>さん。一つ聞いていいですか。あなたは——<span class="term-kosen">yorino</span>が禁書を手に入れた時、何をしようとしているか、本当に分かっていますか？」</p>
+
+      <p><span class="term-kosen">タ・ナシン</span>の目が、少し揺れた。</p>
+
+      <p class="dialogue">「境界を壊す。<span class="term-kokuyou">未選択領域</span>と現実を繋ぐ。全ての可能性を解放する——彼女はそう言っていた」</p>
+
+      <p class="dialogue">「それが起きた時、あなたは何が残ると思っていますか」</p>
+
+      <p>返事がなかった。</p>
+
+      <p><span class="term-abura">Komi</span>は続けた。声は責めてはいなかった。ただ問うていた。</p>
+
+      <p class="dialogue">「選択のない世界で、何かを選ぶことはできない。意味のない世界で、誰かを大切にする意味も消える。<span class="term-kosen">yorino</span>が解放しようとしているのは、可能性だけじゃない——選択そのものを破壊する。あなたが彼女を大切に思うその気持ちも、そこでは消える」</p>
+
+      <p>鳥が鳴いた。霧が少し晴れた。</p>
+
+      <p><span class="term-kosen">タ・ナシン</span>は長い間、何も言わなかった。そして——</p>
+
+      <p class="dialogue">「入口は、ここだ」と彼は言った。</p>
+
+      <p>それは妨害しないという意味だった。</p>
+
+      <div class="scene-break">── ◆ ──</div>
+
+      <p>入口は、正確には「薄皮」だった。現実と未選択の境界が最も薄くなっている地点に立ち、特定の方法で意識を向けると——境界が破れる。穴が開く。そこに身を投じる。</p>
+
+      <p><span class="term-kokuyou">ikue</span>がその方法を直感で理解した。旋律がそこから来ていたから。</p>
+
+      <p class="dialogue">「私が先に行く。後に続いて」</p>
+
+      <p>そして<span class="term-kokuyou">ikue</span>は、踏み込んだ。</p>
+
+      <p>続いて<span class="term-kokuyou">BlackPepper</span>、<span class="term-kokuyou">a s</span>、<span class="term-abura">Komi</span>、<span class="term-abura">Naoki</span>。</p>
+
+      <p>五人が未選択の海の中へと、沈んでいった。</p>
+
+      <div class="chapter-endtag">// CHAPTER 05 END ◆ BOUNDARY BREACH INITIATED</div>
+    </div>
+  </section>
+
+
+  <!-- ── 第六章 ── -->
+  <section id="ch6" class="chapter">
+    <div class="content">
+      <div class="chapter-head">
+        <p class="chapter-label">CHAPTER 06</p>
+        <h2 class="chapter-number">第六章：未選択の海へ</h2>
+        <p class="chapter-subtitle-text">— 選ばれなかった全ての夢が、ここで眠っている —</p>
+        <div class="chapter-divider"></div>
+      </div>
+
+      <p><span class="term-kokuyou">未選択領域</span>は、暗かった。</p>
+
+      <p>正確には、「暗い」という言葉が適切かどうか分からない。光がないというより、光の概念が薄い。この場所では、ものを「見る」という行為が、現実世界でのそれとは少し異なる。目ではなく、より根源的な感覚で認識する——そういう場所だった。</p>
+
+      <p>踏み込んだ瞬間、<span class="term-kokuyou">BlackPepper</span>は息が詰まった。物理的にではなく、情報量という意味で。この空間には——ありとあらゆる「選ばれなかった」ものが充満している。ある判断の断片、ある言葉の欠片、ある行動への衝動が選ばれなかった痕跡——それらが無数に、静かに漂っている。</p>
+
+      <p>これが三年分の蓄積だ、と彼は思った。</p>
+
+      <p>三年間、<span class="term-pragma">W-MIX PRAGMA</span>が処理しなかった全て。人類の全ての選択の全ての反対側が、ここに溜まっている。</p>
+
+      <p class="dialogue">「……圧倒的」と<span class="term-kokuyou">a s</span>が呟いた。観測端末を持ち込んでいたが、データの洪水に処理が追いつかない様子だった。「密度が、想定の十倍以上。これは——」</p>
+
+      <p class="dialogue">「落ち着いて」と<span class="term-kokuyou">ikue</span>が言った。「この海を泳ぐには、情報を分析しようとしないこと。流れに乗る。それだけ」</p>
+
+      <p><span class="term-kokuyou">ikue</span>の声が、この空間では不思議な響きを持った。まるで複数の周波数が重なっているように。彼女がここに馴染んでいる、ということが、その声から分かった。</p>
+
+      <p>旋律が、近かった。</p>
+
+      <p class="dialogue">「あっちだ」と<span class="term-kokuyou">ikue</span>は言い、進んだ。</p>
+
+      <div class="hr-cyan"></div>
+
+      <p>しばらく進んだところで——<span class="term-kosen">yorino</span>を見つけた。</p>
+
+      <p>彼女はある地点の前に立ち止まっていた。動いていなかった。近づいて見ると——表情が、穏やかだった。この場所に入る前とは異なる穏やかさ。故郷に帰った者の安堵に似た表情。</p>
+
+      <p>彼女が見つめる先に、それはあった。</p>
+
+      <p>禁書<span class="term-forbidden">『ぶぶか油そば』</span>は、物理的な本の形をしていなかった。</p>
+
+      <p>それは光の構造体だった——無数の分岐ラインが一点に集中し、互いに参照し合い、自己言及的な光のループを形成している。近づくにつれて、その中に「文字」のようなものが見え始めた。しかし文字とも言えない——選択の記号、分岐の言語、この世界が決断を記述する時に使う原初の表記。</p>
+
+      <p><span class="term-kosen">yorino</span>が口を開いた。五人の接近に気づいていたが、振り返らなかった。</p>
+
+      <p class="dialogue">「綺麗でしょう」</p>
+
+      <p class="dialogue">「ああ」と<span class="term-kokuyou">BlackPepper</span>は答えた。「綺麗だ」</p>
+
+      <p class="dialogue">「私はずっと、これが何かを知りたかった。選ばれなかった世界から生まれた私が、この世界の構造の中心を見たかった」</p>
+
+      <p class="dialogue">「今、何が見える？」</p>
+
+      <p>長い沈黙の後、<span class="term-kosen">yorino</span>は振り返った。その目は——怒りが薄れていた。怒りの代わりに、何か別のものが宿っていた。驚愕、に近い何か。</p>
+
+      <p class="dialogue">「私は……誤解していた、かもしれない」</p>
+
+      <p><span class="term-abura">Komi</span>が静かに前に出た。</p>
+
+      <p class="dialogue">「何が見えましたか」</p>
+
+      <p class="dialogue">「この禁書は——管理システムへの批判を封じるために隠されたんじゃない。逆だ」と<span class="term-kosen">yorino</span>は言った。「これを公にすれば管理システムが不要になるから、隠された」</p>
+
+      <p>全員が、その言葉を咀嚼した。</p>
+
+      <p class="dialogue">「もう少し、詳しく」</p>
+
+      <p>その声は——全員が固まった。</p>
+
+      <p>声は、この空間の奥から来た。人の声ではなかった。いや、人の声だった。しかし長い間——とても長い間——使われていなかった声だった。かすれていて、しかし明確だった。</p>
+
+      <p><span class="term-kokuyou">ikue</span>の目が大きく開いた。</p>
+
+      <p class="dialogue">「……Toya？」</p>
+
+      <div class="chapter-endtag">// CHAPTER 06 END ◆ THE UNCHOSEN SEA REVEALED</div>
+    </div>
+  </section>
+
+
+  <!-- ── 第七章 ── -->
+  <section id="ch7" class="chapter">
+    <div class="content">
+      <div class="chapter-head">
+        <p class="chapter-label">CHAPTER 07</p>
+        <h2 class="chapter-number">第七章：Toyaの告白</h2>
+        <p class="chapter-subtitle-text">— 回路の創始者は、なぜここにいるのか —</p>
+        <div class="chapter-divider"></div>
+      </div>
+
+      <p>彼は、禁書の光の構造体の奥深くにいた。</p>
+
+      <p><span class="term-kokuyou">Toya</span>——<span class="term-kokuyou">黒耀回路</span>の創始者、分岐理論の父——は、三年前に姿を消してから、ここにいたのだ。<span class="term-kokuyou">未選択領域</span>の中に。禁書<span class="term-forbidden">『ぶぶか油そば』</span>の中心部に。</p>
+
+      <p>その姿は、三年前の姿と変わっていなかった——いや、正確には、時間が彼にどう作用したか判断できなかった。この場所では時間の流れが現実とは異なる。老いるでも若返るでもなく、ただ「存在している」という状態。</p>
+
+      <p>彼は微笑んだ。</p>
+
+      <p class="dialogue">「久しぶりだ、<span class="term-kokuyou">BlackPepper</span>。<span class="term-kokuyou">a s</span>、<span class="term-kokuyou">ikue</span>。みんな、よく来てくれた」</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>は、感情を押さえるのに一瞬かかった。三年間。何の連絡もなく。組織を残して消えた者への怒りと、ここで会えた安堵が混ざり合い、どちらが先に出るか分からなかった。</p>
+
+      <p>結局、先に出たのは問いだった。</p>
+
+      <p class="dialogue">「なぜ、ここに」</p>
+
+      <p class="dialogue">「必要だったから」と<span class="term-kokuyou">Toya</span>は答えた。「禁書は、読まれる必要があった。そして読むには、この場所から離れてはいけない。読む者がここにいなければ、禁書の定理は——外側の世界と接続できない」</p>
+
+      <p class="dialogue">「つまりあなたは三年間、この本の中にいた？」</p>
+
+      <p class="dialogue">「そうなる」</p>
+
+      <p><span class="term-kokuyou">a s</span>が口を開いた。珍しく、感情的な声で。</p>
+
+      <p class="dialogue">「<span class="term-pragma">W-MIX PRAGMAの沈黙</span>は……あなたが？」</p>
+
+      <p>沈黙。</p>
+
+      <p><span class="term-kokuyou">Toya</span>は答えた。</p>
+
+      <p class="dialogue">「私が止めた」</p>
+
+      <p>空気が変わった。</p>
+
+      <p class="dialogue">「<span class="term-pragma">W-MIX PRAGMA</span>は、<span class="term-kokuyou">黒耀回路</span>の分岐管理システムより上位にある最上位管理機構だ。しかし私は<span class="term-pragma">PRAGMA</span>の設計者でもある。開発の過程で、私だけが知る強制停止コードを持っていた」</p>
+
+      <p class="dialogue">「なぜ止めた」</p>
+
+      <p class="dialogue">「止めなければ、禁書に誰もアクセスできなかったから。<span class="term-pragma">PRAGMA</span>が動いている間は、<span class="term-kokuyou">未選択領域</span>への侵入は完全に遮断される。しかし私は——禁書の定理を世界に届ける必要があった。それには、まず<span class="term-pragma">PRAGMA</span>を止め、未選択領域への道を開くしかなかった」</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>の声が低くなった。</p>
+
+      <p class="dialogue">「その結果として、<span class="term-kokuyou">未選択領域</span>が臨界密度に近づいている。世界が崩壊の瀬戸際に立っている」</p>
+
+      <p class="dialogue">「分かっていた」と<span class="term-kokuyou">Toya</span>は言った。「その危険は、計算に入れていた。そして——この状況だからこそ、全員がここに来た。<span class="term-kosen">yorino</span>も、<span class="term-abura">東京油そば卍国</span>も。これは——計算通りだ」</p>
+
+      <p>怒りの声が上がりかけた。しかし<span class="term-kokuyou">Toya</span>は続けた。</p>
+
+      <p class="dialogue">「聞いてくれ。禁書の定理を、今ここで全員に説明する。それが全ての答えだ——なぜ私がこれをしたか、何が起きているのか、そしてこれからどうすべきか」</p>
+
+      <div class="hr-cyan"></div>
+
+      <p>禁書<span class="term-forbidden">『ぶぶか油そば』</span>の中心に、全員が集まった。<span class="term-kosen">yorino</span>も、<span class="term-abura">KomiとNaoki</span>も。</p>
+
+      <p><span class="term-kokuyou">Toya</span>は語り始めた。</p>
+
+      <p class="dialogue">「この世界の分岐システムは、<span class="term-pragma">W-MIX PRAGMA</span>が設計した。しかし<span class="term-pragma">PRAGMA</span>の設計思想には、根本的な誤りがあった。それは——分岐を無限に続くものとして扱ったことだ」</p>
+
+      <p class="dialogue">「違うのか」と<span class="term-abura">Naoki</span>が言った。</p>
+
+      <p class="dialogue">「違う。禁書の定理が証明しているのは、全ての分岐は収束する、ということだ。無限に枝分かれしているように見える選択の木は、実はその根が一点に繋がっている。全ての可能性の根底に、唯一の単純な原理——それが、この定理の中核だ」</p>
+
+      <p class="dialogue">「それが——禁書の名前に込められた意味か」と<span class="term-abura">Komi</span>が静かに言った。「油そば。麺、油、タレ——それぞれ独立した要素に見えて、一つの丼の中で不可分に存在している。複雑に見える全ては、一つの単純な器の上に乗っている」</p>
+
+      <p><span class="term-kokuyou">Toya</span>は頷いた。</p>
+
+      <p class="dialogue">「そして『ぶぶか』は、その中でも最も純化された形——余分を全て削ぎ落とした、シンプルの極地。禁書の名前は、その定理そのものの比喩だ」</p>
+
+      <p>しばしの沈黙の後、<span class="term-kosen">yorino</span>が言った。ゆっくりと、考えながら。</p>
+
+      <p class="dialogue">「つまり——境界を壊しても、全ての可能性は一点に収束する。無限の解放は、無限の混沌ではなく——」</p>
+
+      <p class="dialogue">「一つの真実への回帰だ」と<span class="term-kokuyou">Toya</span>は言った。「あなたが解放しようとしていた『選ばれなかった可能性』たちは——実はずっと、その真実の一部として存在していた。消されていたんじゃない。ただ——見えていなかっただけだ」</p>
+
+      <p><span class="term-kosen">yorino</span>の目が——初めて、濡れた。</p>
+
+      <p>私は消されかけたのではなく、見えていなかっただけだ。その言葉が、三十年分の彼女の怒りの根を、静かに解いていった。</p>
+
+      <p class="dialogue">「では」と<span class="term-kokuyou">BlackPepper</span>が言った。「今、私たちがすべきことは」</p>
+
+      <p class="dialogue">「この定理を使って、<span class="term-pragma">W-MIX PRAGMA</span>を再起動する。ただし、今度は正しい設計で。分岐を管理するのではなく——分岐が自然に収束することを、支援するシステムとして」</p>
+
+      <p class="dialogue">「<span class="term-kokuyou">未選択領域</span>は？ 臨界密度を超えかけているが」</p>
+
+      <p class="dialogue">「この定理が世界に届けば、<span class="term-kokuyou">未選択領域</span>の膨張は自然に止まる。全ての選択が収束点を持つとわかった瞬間に、未選択の蓄積は——意味を変える。溢れる脅威ではなく、いずれ辿り着く記憶として」</p>
+
+      <p>その言葉が、この小さな海の底に、静かに広がった。</p>
+
+      <div class="scene-break">── ◆ ──</div>
+
+      <p>しかし。</p>
+
+      <p>それは容易くはなかった。<span class="term-pragma">W-MIX PRAGMA</span>の再起動には、その設計に関わった者の——つまり<span class="term-kokuyou">Toya</span>自身の——全てのエネルギーが必要だった。禁書の定理を<span class="term-pragma">PRAGMA</span>の新しい設計として書き込み、それを起動させる行為は、彼が三年間この場所で蓄積してきたもの全てを費やすことを意味する。</p>
+
+      <p><span class="term-kokuyou">BlackPepper</span>はその意味を、一瞬で理解した。</p>
+
+      <p class="dialogue">「それは——お前が消えるということか」</p>
+
+      <p><span class="term-kokuyou">Toya</span>は微笑んだ。穏やかな微笑みだった。</p>
+
+      <p class="dialogue">「正確には、<span class="term-kokuyou">未選択領域</span>の一部になる。<span class="term-pragma">PRAGMA</span>の根幹として組み込まれる。私が設計した最初の<span class="term-pragma">PRAGMA</span>も、実は——私自身の観測記録がコアに使われていた。今度もそうなる。ただ今度は、意識的に」</p>
+
+      <p class="dialogue">「Toya——」</p>
+
+      <p class="dialogue">「これは選択だ」と彼は静かに言った。「誰かに強いられたものじゃない。私が自分で選んだ。それは——分岐の理論が言う通り、正しい在り方だ。選んだ以上、未選択にはならない」</p>
+
+      <p><span class="term-kokuyou">ikue</span>が、涙を堪えながら言った。</p>
+
+      <p class="dialogue">「でも、<span class="term-kokuyou">未選択領域</span>に残るならば——あなたはここで生き続けるようなもの。旋律として。定理として」</p>
+
+      <p class="dialogue">「そうだな」と<span class="term-kokuyou">Toya</span>は笑った。「油そばのタレみたいなものだ。主役じゃないが、なければ全てが崩れる。でもそれでいい——そういう存在の在り方も、ある」</p>
+
+      <div class="chapter-endtag">// CHAPTER 07 END ◆ ORIGIN DISCLOSED</div>
+    </div>
+  </section>
+
+
+  <!-- ── 第八章 ── -->
+  <section id="ch8" class="chapter">
+    <div class="content">
+      <div class="chapter-head">
+        <p class="chapter-label">CHAPTER 08</p>
+        <h2 class="chapter-number">第八章：収束と拡散</h2>
+        <p class="chapter-subtitle-text">— 選ぶことは、全てに別れを告げることではない —</p>
+        <div class="chapter-divider"></div>
+      </div>
+
+      <p>準備には、時間がかかった。</p>
+
+      <p>禁書の定理を<span class="term-pragma">W-MIX PRAGMA</span>の新設計として書き込む作業を、<span class="term-kokuyou">Toya</span>は全員の前で行った。それは一種の儀式に見えた——光の構造体に両手を差し込み、その内部で何かを書き換えていく作業。その間、禁書の旋律が大きくなった。<span class="term-kokuyou">ikue</span>がずっと感じていたあの旋律が、今や全員に聞こえるほどの大きさで響いている。</p>
+
+      <p>そしてその旋律に——複雑だったはずの<span class="term-kokuyou">未選択領域</span>の揺れが、少しずつ合わせ始めた。</p>
+
+      <p>波が同調する。</p>
+
+      <p><span class="term-kokuyou">a s</span>は観測端末を構え続けた。データが次々と書き換わっていく。<span class="term-kokuyou">未選択領域</span>の密度グラフが——初めて、上昇を止めた。</p>
+
+      <p class="dialogue">「……停止した。密度の増加が止まっています」</p>
+
+      <p>誰も歓声を上げなかった。その変化が何を意味するか、全員が知っていたから。</p>
+
+      <div class="hr-cyan"></div>
+
+      <p><span class="term-kosen">yorino</span>は、その作業を静かに見ていた。</p>
+
+      <p>彼女の隣に——いつの間にか<span class="term-kosen">タ・ナシン</span>がいた。外から入口を破って入ってきたのだろう。彼は黙って、隣に立った。</p>
+
+      <p><span class="term-kosen">yorino</span>は彼を見上げた。</p>
+
+      <p class="dialogue">「来たんだ」</p>
+
+      <p class="dialogue">「一人で行かせられない」と<span class="term-kosen">タ・ナシン</span>は言った。「それだけだ」</p>
+
+      <p>短い沈黙の後、<span class="term-kosen">yorino</span>は静かに言った。</p>
+
+      <p class="dialogue">「私、間違ってた？」</p>
+
+      <p class="dialogue">「……方法が違ったかもしれない。でも、怒ったことは間違ってなかった」</p>
+
+      <p>彼女は少し笑った。久しぶりに、軽い笑い方で。</p>
+
+      <p class="dialogue">「やっぱりあなたは上手いね、そういう言い方」</p>
+
+      <div class="scene-break">── ◆ ──</div>
+
+      <p>作業が完了した時——<span class="term-kokuyou">Toya</span>の姿が、少しずつ透けていった。</p>
+
+      <p>光に溶けるように。あるいは、分岐の一本になっていくように。</p>
+
+      <p>彼は最後まで笑っていた。</p>
+
+      <p class="dialogue">「<span class="term-kokuyou">BlackPepper</span>」と彼は言った。「<span class="term-kokuyou">黒耀回路</span>を頼む。でも、もう管理する必要はない。見守るだけでいい——分岐が自然に収束するのを。それが、君たちの新しい役割だ」</p>
+
+      <p class="dialogue">「……分かった」</p>
+
+      <p class="dialogue">「<span class="term-kokuyou">a s</span>。観測し続けろ。でも、たまには端末を置いて空を見上げろ。分岐は数値だけじゃない」</p>
+
+      <p><span class="term-kokuyou">a s</span>は何も言えなかった。頷いた。</p>
+
+      <p class="dialogue">「<span class="term-kokuyou">ikue</span>。ありがとう。あの旋律を聴き続けてくれて。それのおかげで、ここに来られた」</p>
+
+      <p class="dialogue">「……行かないで」と<span class="term-kokuyou">ikue</span>は言った。</p>
+
+      <p class="dialogue">「どこにも行かない」と<span class="term-kokuyou">Toya</span>は言った。「ここにいる。ずっと。旋律として。聴こえなくなることはない」</p>
+
+      <p>そして彼は、<span class="term-kosen">yorino</span>と<span class="term-kosen">タ・ナシン</span>を見た。</p>
+
+      <p class="dialogue">「あなたたちは、正しい怒りを持っていた。その怒りを忘れないでいてくれ——ただ、破壊ではなく、問い続けることに使ってほしい。世界に対して、選択に対して、存在に対して。問いが続く限り、分岐は収束し続ける」</p>
+
+      <p>最後に、<span class="term-abura">Komi</span>を見た。</p>
+
+      <p class="dialogue">「意味の問いを、止めないで。答えが出た後も」</p>
+
+      <p><span class="term-abura">Komi</span>は深く頷いた。</p>
+
+      <p>そして<span class="term-kokuyou">Toya</span>は——消えた。</p>
+
+      <p>「消えた」というより「溶け込んだ」という方が正確かもしれない。禁書の光の構造体の中に。<span class="term-kokuyou">未選択領域</span>の深部に。これから始まる新しい<span class="term-pragma">W-MIX PRAGMA</span>の根幹に。</p>
+
+      <p>その瞬間——<span class="term-kokuyou">未選択領域</span>全体が、一度だけ大きく震えた。</p>
+
+      <p>そして静かになった。</p>
+
+      <div class="hr-cyan"></div>
+
+      <p>地上では、<span class="term-kokuyou">full-氷</span>が変化を感じ取っていた。</p>
+
+      <p>防衛ラインの揺れが——止まっていた。分岐安定指数が、ゆっくりと回復し始めていた。三年間、じわじわと悪化し続けてきたその数値が、初めて逆方向に動いている。</p>
+
+      <p>彼は端末を見つめ、その変化を確認し、それから空を見上げた。</p>
+
+      <p>空が——少し、明るくなっていた。</p>
+
+      <p class="dialogue">「……戻ってきてくれ」</p>
+
+      <p>彼は静かに言った。誰に向けてでもなく、ただその言葉を空に放った。</p>
+
+      <div class="chapter-endtag">// CHAPTER 08 END ◆ CONVERGENCE COMPLETE</div>
+    </div>
+  </section>
+
+
+  <!-- ── 終章 ── -->
+  <section id="epilogue" class="chapter epilogue">
+    <div class="content">
+      <div class="chapter-head">
+        <p class="chapter-label">EPILOGUE</p>
+        <h2 class="chapter-number">終章：新たな分岐へ</h2>
+        <p class="chapter-subtitle-text">— 全ての選択の先に、まだ見ぬ世界がある —</p>
+        <div class="chapter-divider"></div>
+      </div>
+
+      <p>三ヶ月後。</p>
+
+      <p>世界は変わっていた。劇的に、ではない。静かに、深く。</p>
+
+      <p>新しい<span class="term-pragma">W-MIX PRAGMA</span>は——<span class="term-kokuyou">Toya</span>の意識とともに——静かに再起動した。今度はシステムとして「管理」するのではなく、「観測と支援」を行うものとして。分岐を制御するのではなく、それぞれの選択が自然な収束点へと向かうことを、静かに後押しする存在として。</p>
+
+      <p><span class="term-kokuyou">未選択領域</span>の密度は、徐々に低下し始めていた。蓄積されていた膨大な未選択の残滓が、新しい<span class="term-pragma">PRAGMA</span>によって再び処理されていく。しかし今回の処理は以前とは異なる——消去ではなく、統合だ。選ばれなかったものは消されず、収束の一部として認められる。</p>
+
+      <p><span class="term-kokuyou">黒耀回路</span>は活動を続けている。</p>
+
+      <p>ただし、その役割は変わった。分岐を監視し干渉するのではなく、世界の分岐が健全に収束しているかを「見守る」ことが新しい役割だ。<span class="term-kokuyou">BlackPepper</span>はその変化を、組織の誰よりも深く受け入れていた。管理から見守りへ。判断から観察へ。それは彼の本質的な気質には、実は合っていた。</p>
+
+      <p><span class="term-kokuyou">a s</span>は相変わらず観測データを追っているが、ある日の昼過ぎ、<span class="term-kokuyou">Toya</span>に言われた通り、端末を一度置いて外に出た。空を見上げた。分岐ラインが、肉眼では見えない。当たり前のことだが、この時初めてそれを「良いことだ」と思った。見えないからこそ、人は自分の選択を自分のものとして感じられる。</p>
+
+      <div class="scene-break">── ◆ ──</div>
+
+      <p><span class="term-kosen">Kure-KOsen</span>は、解散してはいない。しかし<span class="term-kosen">yorino</span>の姿勢が変わった。</p>
+
+      <p>彼女は今、「問う者」として活動している。<span class="term-pragma">W-MIX PRAGMA</span>の新設計に対して、常に批判的な視点を持ち続ける存在として。それは破壊ではなく、批評だ。システムが再び誤った方向へ向かわないための、外部からの目。</p>
+
+      <p><span class="term-kosen">yorino</span>は、自分が「見えていなかった」ことを知った後も、その経験を忘れていない。忘れないから、見えなくされている者の声を聞き続けることができる。</p>
+
+      <p><span class="term-kosen">タ・ナシン</span>は彼女の隣に、変わらずいる。</p>
+
+      <div class="scene-break">── ◆ ──</div>
+
+      <p><span class="term-abura">東京油そば卍国</span>は——問い続けている。</p>
+
+      <p><span class="term-abura">Komi</span>は禁書の定理を研究し、意味と選択の哲学を体系化しようとしている。簡単には終わらない研究だ。おそらく一生をかけても終わらない。しかし彼女はそれを知りながら続けている。問いが続く限り、意味は生きているから。</p>
+
+      <p><span class="term-abura">Naoki</span>は彼女の研究に付き合いながら、「そんなに難しく考えなくてもいいんじゃないか」と時々言う。<span class="term-abura">Komi</span>はその度に「あなたが言うと説得力がある」と答える。それは肯定とも否定ともつかない言葉だが、<span class="term-abura">Naoki</span>はなぜかいつも満足そうにする。</p>
+
+      <div class="scene-break">── ◆ ──</div>
+
+      <p>そして<span class="term-kokuyou">ikue</span>は、旋律を聴いている。</p>
+
+      <p>以前より近く、以前より明確に聞こえる。<span class="term-kokuyou">未選択領域</span>の奥から流れてくるあの旋律——それが<span class="term-kokuyou">Toya</span>の声なのか、禁書の定理そのものの響きなのか、あるいは世界中の全ての選択が収束へと向かう音なのか、<span class="term-kokuyou">ikue</span>には判断できない。しかし判断する必要もない。</p>
+
+      <p>ただ、聴こえる。</p>
+
+      <p>それだけで、十分だった。</p>
+
+      <div class="hr-cyan"></div>
+
+      <blockquote class="pragma-quote">
+        「全ての選択は、いつかひとつに帰る。<br>
+        ならば、選ぶことを恐れるな。<br>
+        選ばれなかった道は消えない——<br>
+        ただ、より深い場所で、あなたを支えている。」<br>
+        <br>
+        ——禁書『ぶぶか油そば』より、第一定理の前書き
+      </blockquote>
+
+      <p>世界の分岐は今日も続いている。</p>
+
+      <p>あなたが今この瞬間、次の言葉を選ぶように。次の一歩を踏み出すように。コーヒーに砂糖を入れるかどうかを一瞬迷うように。</p>
+
+      <p>全ての選択が、旋律の一音になる。</p>
+
+      <p>そしてその旋律はいつか——一つの、静かで単純な、音に収束する。</p>
+
+      <p>それを聴く者が、この世界のどこかに、必ずいる。</p>
+
+      <div class="scene-break">── ◆  ◆  ◆ ──</div>
+
+      <p style="text-align:center; font-family:'Zen Old Mincho',serif; font-size:1.1rem; letter-spacing:0.3em; color: var(--kokuyou-cyan); text-shadow: 0 0 15px rgba(0,212,255,0.4);">了</p>
+
+      <div class="chapter-endtag">// EPILOGUE END ◆ NEW DIVERGENCE INITIATED ◆ W-MIX PRAGMA ONLINE</div>
+    </div>
+  </section>
+
+
+  <!-- フッター -->
+  <footer class="book-footer">
+    <span class="footer-mark">◆</span>
+    <div>黒耀回路——未選択の彼方へ</div>
+    <div style="margin-top:0.5rem; opacity:0.5;">KOKUYOU KAIRO ◆ DIVERGENCE MANAGEMENT UNIT ◆ OBSERVATION COMPLETE</div>
+  </footer>
+
+</div><!-- /main-wrapper -->
+
+<script>
+  // アクティブナビリンク
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => link.style.color = '');
+        navLinks.forEach(link => link.style.borderLeftColor = '');
+        navLinks.forEach(link => link.style.background = '');
+        const activeLink = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+        if (activeLink) {
+          activeLink.style.color = 'var(--kokuyou-cyan)';
+          activeLink.style.borderLeftColor = 'var(--kokuyou-cyan)';
+          activeLink.style.background = 'var(--kokuyou-cyan-glow)';
+        }
+      }
+    });
+  }, { threshold: 0.15 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

@@ -48,25 +48,19 @@ export default function TopPage() {
             onChange={e => setSearch(e.target.value)}
           />
         </div>
-        <div className="sort-buttons">
-          <button
-            className={`sort-btn ${sortOrder === 'default' ? 'active' : ''}`}
-            onClick={() => setSortOrder('default')}
+        <div className="sort-select-wrapper">
+          <select
+            className="sort-select"
+            value={sortOrder}
+            onChange={e => setSortOrder(e.target.value)}
           >
-            デフォルト
-          </button>
-          <button
-            className={`sort-btn ${sortOrder === 'asc' ? 'active' : ''}`}
-            onClick={() => setSortOrder('asc')}
-          >
-            五十音 ↑
-          </button>
-          <button
-            className={`sort-btn ${sortOrder === 'desc' ? 'active' : ''}`}
-            onClick={() => setSortOrder('desc')}
-          >
-            五十音 ↓
-          </button>
+            <option value="default">並び替え：デフォルト</option>
+            <option value="asc">五十音順（昇順）</option>
+            <option value="desc">五十音順（降順）</option>
+          </select>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
         </div>
       </div>
 

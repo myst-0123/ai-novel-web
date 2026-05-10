@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOYA vs YRN ― 諸悪の根源を討て</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Noto+Sans+JP:wght@300;400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #07070d;
+    --bg2:       #0d0d1c;
+    --bg3:       #111128;
+    --accent:    #00e5ff;
+    --accent2:   #7b61ff;
+    --red:       #ff4466;
+    --yellow:    #f0c040;
+    --green:     #39ff8f;
+    --text:      #c8cfe8;
+    --text-dim:  #5a6080;
+    --border:    rgba(0,229,255,0.18);
+    --glow:      0 0 18px rgba(0,229,255,0.35);
+    --glow-red:  0 0 18px rgba(255,68,102,0.4);
+    --glow-grn:  0 0 16px rgba(57,255,143,0.35);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 300;
+    line-height: 1.9;
+    font-size: 15px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── noise overlay ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: 0.5;
+  }
+
+  /* ── scanline ── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center;
+    padding: 60px 20px;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 60%, rgba(0,229,255,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 20% 20%, rgba(123,97,255,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 30% 20% at 80% 80%, rgba(255,68,102,0.06) 0%, transparent 60%),
+      var(--bg);
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridMove 20s linear infinite;
+  }
+
+  @keyframes gridMove {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(40px); }
+  }
+
+  .hero-content { position: relative; z-index: 2; }
+
+  .hero-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    opacity: 0.8;
+  }
+
+  .hero-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(36px, 8vw, 72px);
+    font-weight: 700;
+    line-height: 1.15;
+    color: #fff;
+    text-shadow: 0 0 60px rgba(0,229,255,0.3), 0 0 120px rgba(0,229,255,0.12);
+    margin-bottom: 16px;
+  }
+
+  .hero-title .yrn {
+    color: var(--red);
+    text-shadow: 0 0 40px rgba(255,68,102,0.6), 0 0 80px rgba(255,68,102,0.25);
+  }
+
+  .hero-sub {
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    margin-bottom: 56px;
+  }
+
+  .scroll-hint {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    opacity: 0.5;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:0.8} }
+
+  /* ── MAIN ── */
+  .main {
+    position: relative; z-index: 2;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px 120px;
+  }
+
+  /* ── CHAPTER ── */
+  .chapter {
+    margin-bottom: 80px;
+    position: relative;
+  }
+
+  .chapter-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .chapter-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.25em;
+    opacity: 0.7;
+    white-space: nowrap;
+    padding-top: 2px;
+  }
+
+  .chapter-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(18px, 4vw, 24px);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.4;
+  }
+
+  p {
+    margin-bottom: 1.5em;
+    color: var(--text);
+  }
+
+  em { color: var(--accent); font-style: normal; }
+
+  strong { color: #fff; font-weight: 700; }
+
+  /* ── BATTLE chapter special ── */
+  .chapter.battle {
+    padding: 40px;
+    background: linear-gradient(135deg, rgba(255,68,102,0.04) 0%, rgba(123,97,255,0.04) 100%);
+    border: 1px solid rgba(255,68,102,0.2);
+    border-radius: 4px;
+    box-shadow: inset 0 0 60px rgba(255,68,102,0.04), 0 0 40px rgba(255,68,102,0.06);
+  }
+
+  .chapter.battle .chapter-num { color: var(--red); }
+  .chapter.battle .chapter-title {
+    text-shadow: 0 0 20px rgba(255,68,102,0.4);
+  }
+
+  /* ── YRN APPEAR ── */
+  .yrn-appear {
+    background: var(--bg3);
+    border: 1px solid rgba(255,68,102,0.35);
+    border-radius: 3px;
+    padding: 28px 32px;
+    margin: 32px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .yrn-appear::before {
+    content: '⚠ ENTITY DETECTED';
+    position: absolute; top: 10px; right: 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--red);
+    letter-spacing: 0.2em;
+    opacity: 0.6;
+  }
+
+  .yrn-appear::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--red), transparent);
+    animation: scanH 3s ease-in-out infinite;
+  }
+
+  @keyframes scanH {
+    0% { opacity: 0; transform: translateX(-100%); }
+    50% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(100%); }
+  }
+
+  .yrn-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(28px, 6vw, 52px);
+    font-weight: 700;
+    color: var(--red);
+    text-shadow: var(--glow-red);
+    letter-spacing: 0.3em;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .yrn-desc {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,68,102,0.55);
+    letter-spacing: 0.15em;
+  }
+
+  /* ── HP BAR ── */
+  .hp-display {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 20px 24px;
+    margin: 28px 0;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .hp-label {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    display: flex; justify-content: space-between;
+  }
+
+  .hp-bar-wrap {
+    height: 10px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+
+  .hp-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1.5s ease;
+  }
+
+  .hp-bar.toya { background: linear-gradient(90deg, var(--accent2), var(--accent)); box-shadow: var(--glow); width: 100%; }
+  .hp-bar.yrn  { background: linear-gradient(90deg, #ff1a3c, #ff6688); box-shadow: var(--glow-red); width: 100%; }
+  .hp-val { font-size: 10px; color: var(--text-dim); }
+
+  /* ── SKILL CARD ── */
+  .skill-use {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    align-items: start;
+    background: rgba(0,0,0,0.3);
+    border-left: 3px solid var(--accent2);
+    padding: 18px 20px;
+    margin: 20px 0;
+    border-radius: 0 3px 3px 0;
+  }
+
+  .skill-use.enemy { border-left-color: var(--red); }
+  .skill-use.ally  { border-left-color: var(--green); }
+
+  .skill-icon {
+    font-size: 26px;
+    line-height: 1;
+    margin-top: 2px;
+  }
+
+  .skill-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    margin-bottom: 4px;
+  }
+
+  .skill-use.enemy .skill-name { color: var(--red); }
+  .skill-use.ally  .skill-name { color: var(--green); }
+
+  .skill-desc { font-size: 13.5px; color: var(--text); margin: 0; }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: #050510;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 20px 24px;
+    margin: 24px 0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: auto;
+    position: relative;
+  }
+
+  .code-block::before {
+    content: attr(data-label);
+    position: absolute; top: 8px; right: 12px;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .code-block .c-keyword { color: var(--accent2); }
+  .code-block .c-func    { color: var(--accent); }
+  .code-block .c-str     { color: var(--yellow); }
+  .code-block .c-comment { color: #3a4060; }
+  .code-block .c-ok      { color: var(--green); }
+  .code-block .c-err     { color: var(--red); }
+  .code-block .c-num     { color: #ff9955; }
+
+  /* ── DAMAGE NUMBER ── */
+  .dmg {
+    display: inline-block;
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: 700;
+    font-size: 18px;
+    padding: 2px 10px;
+    border-radius: 2px;
+    margin: 0 4px;
+    vertical-align: middle;
+  }
+
+  .dmg.hit  { color: var(--red); text-shadow: var(--glow-red); }
+  .dmg.deal { color: var(--accent); text-shadow: var(--glow); }
+  .dmg.heal { color: var(--green); text-shadow: var(--glow-grn); }
+  .dmg.crit { color: var(--yellow); text-shadow: 0 0 20px rgba(240,192,64,0.6); font-size: 22px; }
+
+  /* ── STATUS EFFECT ── */
+  .status-list {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin: 16px 0;
+  }
+
+  .status-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    padding: 4px 10px;
+    border-radius: 2px;
+    border: 1px solid;
+  }
+
+  .status-tag.bad  { color: var(--red);    border-color: rgba(255,68,102,0.4); background: rgba(255,68,102,0.08); }
+  .status-tag.good { color: var(--green);  border-color: rgba(57,255,143,0.4); background: rgba(57,255,143,0.08); }
+  .status-tag.neu  { color: var(--yellow); border-color: rgba(240,192,64,0.4); background: rgba(240,192,64,0.08); }
+
+  /* ── DIALOGUE ── */
+  .dialogue {
+    padding: 20px 24px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 3px;
+    margin: 20px 0;
+    position: relative;
+  }
+
+  .dialogue .speaker {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    margin-bottom: 6px;
+  }
+
+  .dialogue.toya .speaker { color: var(--accent); }
+  .dialogue.yrn  .speaker { color: var(--red); }
+  .dialogue.kana .speaker { color: var(--green); }
+
+  .dialogue p { margin: 0; font-size: 14.5px; }
+
+  /* ── DIVIDER ── */
+  .div-line {
+    display: flex; align-items: center; gap: 16px;
+    margin: 48px 0 40px;
+    opacity: 0.35;
+  }
+
+  .div-line::before, .div-line::after {
+    content: ''; flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  .div-line span {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* ── EPILOGUE ── */
+  .chapter.epilogue {
+    padding: 40px;
+    background: linear-gradient(135deg, rgba(0,229,255,0.03) 0%, rgba(57,255,143,0.03) 100%);
+    border: 1px solid rgba(57,255,143,0.15);
+    border-radius: 4px;
+  }
+
+  .chapter.epilogue .chapter-num { color: var(--green); }
+
+  /* ── TERMINAL OUTPUT ── */
+  .terminal {
+    background: #020208;
+    border: 1px solid rgba(57,255,143,0.3);
+    border-radius: 3px;
+    padding: 24px 28px;
+    margin: 28px 0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    box-shadow: 0 0 30px rgba(57,255,143,0.08);
+  }
+
+  .terminal .prompt { color: var(--green); }
+  .terminal .out    { color: rgba(57,255,143,0.6); }
+  .terminal .ok     { color: var(--green); font-weight: 700; text-shadow: var(--glow-grn); }
+  .terminal .err    { color: var(--red); }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative; z-index: 2;
+    text-align: center;
+    padding: 40px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--text-dim);
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+
+  /* ── BOSS HP ANIMATION ── */
+  .hp-bar.yrn.damaged  { width: 38%; }
+  .hp-bar.yrn.critical { width: 8%; background: linear-gradient(90deg, #800020, #ff1a3c); animation: hpFlash 0.5s ease infinite; }
+  .hp-bar.toya.hit     { width: 54%; }
+
+  @keyframes hpFlash { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .chapter.battle, .chapter.epilogue { padding: 24px 18px; }
+    .skill-use { padding: 14px 16px; }
+    .code-block { font-size: 11.5px; padding: 16px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-label">// A Research Fantasy &nbsp;|&nbsp; Information Science Department</div>
+    <h1 class="hero-title">TOYA vs <span class="yrn">YRN</span></h1>
+    <p class="hero-sub">諸悪の根源を討て ― 研究者の逆襲</p>
+    <div class="scroll-hint">▼ &nbsp; scroll to read &nbsp; ▼</div>
+  </div>
+</section>
+
+<!-- ===== MAIN ===== -->
+<main class="main">
+
+  <!-- Ch.1 -->
+  <article class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-num">CH.01</span>
+      <h2 class="chapter-title">「限界」</h2>
+    </div>
+
+    <p>午前三時。</p>
+    <p>TOYAはモニターの前で死んでいた。</p>
+    <p>正確には、生きていた。辛うじて。</p>
+
+    <div class="code-block" data-label="error.log">
+<span class="c-err">FATAL</span>: Model convergence failed after <span class="c-num">10000</span> iterations<br>
+<span class="c-err">FATAL</span>: NullPointerException at Experiment.run() line <span class="c-num">247</span><br>
+<span class="c-err">FATAL</span>: Deadline exceeded — remaining time: <span class="c-num">-3h 22m</span><br>
+<span class="c-comment">// ……また、か</span>
+    </div>
+
+    <p>エラーログが画面を埋め尽くし、コーヒーの空き缶が山を築き、論文の〆切カウンターが無慈悲に刻を刻む。ポスドク四年目。睡眠時間は一日平均三・二時間。最後にまともな飯を食ったのがいつかも思い出せない。</p>
+    <p><em>――「もう、限界だ」</em></p>
+    <p>TOYAは静かに立ち上がった。</p>
+    <p>膝に積まれていた文献の山が崩れ、床に散乱した。TOYAはそれを踏んだ。踏みにじった。かつては一ページ一ページを神聖視していたあの論文たちを。</p>
+    <p>コートを羽織り、IDカードをポケットに突っ込む。</p>
+    <p>「行くか」</p>
+    <p>研究室のドアが、静かに、しかし決定的に閉じた。</p>
+  </article>
+
+  <div class="div-line"><span>// INTERLUDE</span></div>
+
+  <!-- Ch.2 -->
+  <article class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-num">CH.02</span>
+      <h2 class="chapter-title">「YRN、その正体」</h2>
+    </div>
+
+    <p>TOYAが長い廊下を歩きながら考えるのは、YRNのことだった。</p>
+    <p><strong>YRN</strong>。</p>
+    <p>学内でその名を知らぬ者はいない。</p>
+    <p><em>Yield, Revise, Now</em> ――ジャーナルからの査読コメントに毎回記される、あの三文字。いや、それだけではない。YRNとはひとつの概念だった。学術界に巣食う、あらゆる悪の集合体。</p>
+
+    <div class="status-list">
+      <span class="status-tag bad">⚠ 締め切り</span>
+      <span class="status-tag bad">⚠ リジェクション</span>
+      <span class="status-tag bad">⚠ 競争資金枯渇</span>
+      <span class="status-tag bad">⚠ 意味不明な査読</span>
+      <span class="status-tag bad">⚠ 学振不採択</span>
+      <span class="status-tag bad">⚠ 先行研究との差別化を明確に</span>
+      <span class="status-tag bad">⚠ インパクトファクター幻想</span>
+    </div>
+
+    <p>TOYAはこれらすべてを、YRNと呼んでいた。</p>
+    <p>そして今夜、決着をつける。</p>
+  </article>
+
+  <div class="div-line"><span>// CHAPTER SELECT</span></div>
+
+  <!-- Ch.3 -->
+  <article class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-num">CH.03</span>
+      <h2 class="chapter-title">「深夜の街へ」</h2>
+    </div>
+
+    <p>大学の門を出た瞬間、冷たい夜風がTOYAの頰を叩いた。</p>
+    <p><em>生きている。</em></p>
+    <p>そう思った。外の空気がこんなに冷たいことを、TOYAはしばらく忘れていた。星が出ていた。空に星があることも、忘れていた。</p>
+    <p>コンビニに入った。レジ前のホットスナックのケースが輝いていた。からあげクン、レッド。TOYAは三袋買った。イートインコーナーに座り、袋を開けた瞬間、鼻腔を突いた油と鶏の香りで、危うく泣きそうになった。</p>
+    <p>「……うまい」</p>
+    <p>これがYRNに対する、最初の一撃だった。<em>食う。眠る。生きる。</em>　研究室はそれを忘れさせようとする。しかしTOYAは今夜、取り戻す。</p>
+  </article>
+
+  <div class="div-line"><span>// PARTY MEMBER JOINS</span></div>
+
+  <!-- Ch.4 -->
+  <article class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-num">CH.04</span>
+      <h2 class="chapter-title">「仲間たち」</h2>
+    </div>
+
+    <p>歩いていると、公園のベンチに人影があった。</p>
+
+    <div class="dialogue kana">
+      <div class="speaker">KANA / D3 · サポートクラス「統計魔道士」</div>
+      <p>「……TOYAか」</p>
+    </div>
+
+    <p>D3のKANA。同じ研究科の後輩だった。目の下のクマが、TOYAのものと双璧をなしていた。</p>
+    <p>「KANAもか」「私も逃げてきた」</p>
+    <p>ふたりは並んでベンチに座った。しばらく誰も喋らなかった。遠くで猫が鳴いた。</p>
+
+    <div class="dialogue kana">
+      <div class="speaker">KANA</div>
+      <p>「YRN、強いよな」</p>
+    </div>
+
+    <div class="dialogue toya">
+      <div class="speaker">TOYA</div>
+      <p>「ああ。でも倒せる」</p>
+    </div>
+
+    <div class="dialogue kana">
+      <div class="speaker">KANA</div>
+      <p>「根拠は？」</p>
+    </div>
+
+    <p>TOYAはからあげクンの袋をKANAに差し出した。KANAは一個つまんで、口に入れた。咀嚼して、飲み込んだ。</p>
+
+    <div class="dialogue kana">
+      <div class="speaker">KANA</div>
+      <p>「……そうかも」</p>
+    </div>
+
+    <div class="status-list">
+      <span class="status-tag good">✓ KANA がパーティに加わった</span>
+      <span class="status-tag good">✓ からあげクン補給 +30 HP</span>
+      <span class="status-tag neu">▲ 深夜0時23分</span>
+    </div>
+  </article>
+
+  <div class="div-line"><span>// WARNING: ENCOUNTER AHEAD</span></div>
+
+  <!-- Ch.5 BATTLE -->
+  <article class="chapter battle">
+    <div class="chapter-header">
+      <span class="chapter-num">CH.05</span>
+      <h2 class="chapter-title">「降臨 ―― YRNとの決戦」</h2>
+    </div>
+
+    <p>大学へ戻る帰路、異変は突然起きた。</p>
+    <p>夜空の色が変わった。星が消え、空気が粘度を帯びた。アスファルトにひびが走り、そこから染み出してくるのは――<em>査読コメント</em>だった。</p>
+    <p>無数の文字列が路面を覆い、空中に浮かび上がり、渦を巻いた。</p>
+
+    <div class="yrn-appear">
+      <span class="yrn-name">Y R N</span>
+      <span class="yrn-desc">Yield · Revise · Now &nbsp;|&nbsp; The Root of All Academic Evil<br>CLASS: Legendary Boss &nbsp;|&nbsp; TYPE: 概念体 &nbsp;|&nbsp; WEAKNESS: ???</span>
+    </div>
+
+    <div class="hp-display">
+      <div class="hp-label"><span>YRN HP</span><span>∞ / ∞</span></div>
+      <div class="hp-bar-wrap"><div class="hp-bar yrn" id="yrnHp"></div></div>
+      <div class="hp-val">「お前はもう疲れているだろう……ならば屈服せよ」</div>
+    </div>
+    <div class="hp-display">
+      <div class="hp-label"><span>TOYA HP</span><span>53 / 100</span></div>
+      <div class="hp-bar-wrap"><div class="hp-bar toya" id="toyaHp" style="width:53%"></div></div>
+    </div>
+
+    <p>YRNの本体は巨大な渦だった。リジェクションレターと査読コメントが高速回転し、その中心でインパクトファクターが太陽のように輝いている。傍らには「先行研究との差別化を明確に」と書かれた石板が無限に生成されつづけていた。</p>
+
+    <div class="dialogue yrn">
+      <div class="speaker">YRN</div>
+      <p>「貴様らの研究など……誰にも必要とされない。提出せよ、撤回せよ、屈服せよ。<strong>MAJOR REVISION REQUIRED。</strong>」</p>
+    </div>
+
+    <div class="dialogue toya">
+      <div class="speaker">TOYA</div>
+      <p>「黙れ。俺はお前のことを、ずっと前から知っている」</p>
+    </div>
+
+    <p>TOYAのコートが風にはためいた。懐から取り出したのはラップトップではなかった。<em>ターミナルそのものだった。</em></p>
+    <p>情報系研究者が四年かけて鍛え上げた、コマンドラインという名の魔法陣。</p>
+
+    <!-- ターン1 -->
+    <p style="margin-top:32px; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size:11px; letter-spacing:0.2em;">▶ TURN 01 ―― TOYA</p>
+
+    <div class="skill-use">
+      <div class="skill-icon">🔱</div>
+      <div>
+        <div class="skill-name">SKILL: DIVIDE AND CONQUER</div>
+        <p class="skill-desc">TOYAは問題を分割した。「お前は複雑に見えるが、ただのO(n²)アルゴリズムだ」。YRNの外殻が半分に割れる。</p>
+      </div>
+    </div>
+
+    <div class="code-block" data-label="spell.py">
+<span class="c-keyword">def</span> <span class="c-func">divide_and_conquer</span>(yrn, depth=<span class="c-num">0</span>):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-keyword">if</span> yrn.is_trivial(): <span class="c-keyword">return</span> <span class="c-func">solve</span>(yrn)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;left, right = <span class="c-func">split</span>(yrn)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-keyword">return</span> <span class="c-func">merge</span>(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-func">divide_and_conquer</span>(left,  depth+<span class="c-num">1</span>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-func">divide_and_conquer</span>(right, depth+<span class="c-num">1</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br>
+<br>
+<span class="c-ok">✓ YRN.complexity reduced: O(n²) → O(n log n)</span>
+    </div>
+
+    <p>YRNにダメージ <span class="dmg deal">-847 DMG</span>　YRNの外殻「無意味な先行研究の引用」が剥落した。</p>
+
+    <!-- YRNのターン -->
+    <p style="margin-top:32px; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size:11px; letter-spacing:0.2em;">▶ TURN 01 ―― YRN</p>
+
+    <div class="skill-use enemy">
+      <div class="skill-icon">💢</div>
+      <div>
+        <div class="skill-name">YRN ATTACK: NULL POINTER EXCEPTION BOLT</div>
+        <p class="skill-desc">YRNが虚無を指さした。「お前の仮説は参照先が存在しない」。TOYAの思考に電撃が走る。</p>
+      </div>
+    </div>
+
+    <p>TOYAは <span class="dmg hit">-38 DMG</span> を受けた。<br>
+    状態異常：<span class="status-tag bad" style="display:inline-block">⚠ セグフォ状態（集中力低下）</span></p>
+
+    <div class="dialogue yrn">
+      <div class="speaker">YRN</div>
+      <p>「HAHAHA。お前の実験は再現性がない。p値を見ろ、p＝0.051だ。有意ではない。無意味だ。お前の四年間は無意味だ」</p>
+    </div>
+
+    <!-- ターン2 -->
+    <p style="margin-top:32px; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size:11px; letter-spacing:0.2em;">▶ TURN 02 ―― KANA (サポート)</p>
+
+    <div class="skill-use ally">
+      <div class="skill-icon">📊</div>
+      <div>
+        <div class="skill-name">SKILL: BOOTSTRAP SAMPLING（KANA）</div>
+        <p class="skill-desc">「p値だけが真実じゃない」。KANAが統計魔法を展開。一万回のリサンプリングで信頼区間を可視化する。YRNの「有意差マウント」が無効化される。</p>
+      </div>
+    </div>
+
+    <div class="status-list">
+      <span class="status-tag good">✓ セグフォ状態 解除</span>
+      <span class="status-tag good">✓ Effect size: d = 0.82 (LARGE)</span>
+      <span class="status-tag neu">▲ YRNに混乱付与</span>
+    </div>
+
+    <!-- ターン3 -->
+    <p style="margin-top:32px; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size:11px; letter-spacing:0.2em;">▶ TURN 03 ―― TOYA</p>
+
+    <div class="skill-use">
+      <div class="skill-icon">🔁</div>
+      <div>
+        <div class="skill-name">SKILL: GIT RESET --HARD</div>
+        <p class="skill-desc">TOYAは叫んだ。「お前に汚されたすべてを、巻き戻す！」。過去のコミット履歴から力を引き出し、YRNによって歪められた研究の軌跡をクリーンな状態へ復元する。</p>
+      </div>
+    </div>
+
+    <div class="code-block" data-label="terminal">
+<span class="c-comment">$ git log --oneline</span><br>
+<span class="c-str">a1f3c2b</span> feat: 実験パイプライン完成<br>
+<span class="c-str">9e7d40a</span> fix: データ前処理バグ修正<br>
+<span class="c-str">4b2f811</span> init: 研究開始 ← <span class="c-comment">ここに戻る</span><br>
+<br>
+<span class="c-comment">$ git reset --hard 4b2f811</span><br>
+<span class="c-ok">HEAD is now at 4b2f811 — 初心、取り戻した</span>
+    </div>
+
+    <p>YRNにダメージ <span class="dmg deal">-1204 DMG</span>　YRNの核「蓄積した敗北感」が揺らいだ。</p>
+
+    <!-- YRNの反撃 -->
+    <p style="margin-top:32px; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size:11px; letter-spacing:0.2em;">▶ TURN 03 ―― YRN（激怒）</p>
+
+    <div class="skill-use enemy">
+      <div class="skill-icon">🌪️</div>
+      <div>
+        <div class="skill-name">YRN ULTIMATE: STACK OVERFLOW OF DESPAIR</div>
+        <p class="skill-desc">YRNが真の姿を現した。無限再帰する自己否定。「お前はもう限界だろう？」「才能がないのでは？」「そもそも向いていないのでは？」——コールスタックが溢れ、精神に過負荷がかかる。</p>
+      </div>
+    </div>
+
+    <div class="dialogue yrn">
+      <div class="speaker">YRN</div>
+      <p>「RECURSION DEPTH EXCEEDED. お前の研究者人生は、STACK OVERFLOW だ……！！」</p>
+    </div>
+
+    <p>TOYAは <span class="dmg hit">-61 DMG</span> を受けた。膝が折れそうになった。</p>
+    <p>地面に手をついた。息が乱れた。<em>脳内でエラーが鳴り響く。</em></p>
+    <p>――しかし。</p>
+    <p>TOYAは笑った。</p>
+
+    <div class="dialogue toya">
+      <div class="speaker">TOYA</div>
+      <p>「……お前、知らないんだな。スタックが溢れたときは、<strong>末尾再帰最適化</strong>を使えばいい」</p>
+    </div>
+
+    <!-- FINAL TURN -->
+    <p style="margin-top:40px; color: var(--red); font-family: 'Share Tech Mono', monospace; font-size:11px; letter-spacing:0.2em; text-shadow: var(--glow-red);">▶ FINAL TURN ―― TOYA / LIMIT BREAK</p>
+
+    <div class="skill-use" style="border-left-color: var(--yellow); background: rgba(240,192,64,0.06);">
+      <div class="skill-icon">✨</div>
+      <div>
+        <div class="skill-name" style="color: var(--yellow);">LIMIT BREAK: GRADIENT DESCENT TO CONVERGENCE</div>
+        <p class="skill-desc">すべての経験が損失関数となり、TOYAは最急降下法で解に向かって収束し始めた。四年分の失敗、リジェクション、徹夜、エラーログ――それらすべてが学習データだった。</p>
+      </div>
+    </div>
+
+    <div class="code-block" data-label="final_spell.py">
+<span class="c-keyword">for</span> epoch <span class="c-keyword">in</span> <span class="c-func">range</span>(<span class="c-num">1461</span>):  <span class="c-comment"># 4年間 = 1461日</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;loss = <span class="c-func">compute_loss</span>(rejections, deadlines, loneliness)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;grad = <span class="c-func">backprop</span>(loss)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-comment"># すべての失敗が、勾配になる</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;params -= learning_rate * grad<br>
+<br>
+<span class="c-ok">✓ Epoch 1461/1461 — Loss: 0.0003 → CONVERGED</span><br>
+<span class="c-ok">✓ Model: TOYA_v4.0 — Accuracy: 99.97%</span>
+    </div>
+
+    <p>YRNに <span class="dmg crit">⚡ -9999 CRITICAL DMG</span></p>
+
+    <div class="hp-display">
+      <div class="hp-label"><span>YRN HP</span><span id="yrnHpVal">CRITICAL</span></div>
+      <div class="hp-bar-wrap"><div class="hp-bar yrn critical" id="yrnHpFinal"></div></div>
+    </div>
+
+    <p>YRNが揺らいだ。査読コメントが散り散りになり、インパクトファクターの偽りの輝きが消えた。石板が砕け、リジェクションレターが灰になり、風に運ばれていった。</p>
+
+    <div class="dialogue yrn">
+      <div class="speaker">YRN</div>
+      <p>「バカな……お前は疲れていたはずだ……なぜ……なぜ立てる……」</p>
+    </div>
+
+    <div class="dialogue toya">
+      <div class="speaker">TOYA</div>
+      <p>「疲れてたよ。限界だった。でも逃げて、からあげクン食って、星を見た。それだけで充分だった」</p>
+    </div>
+
+    <p>YRNは消えなかった。</p>
+    <p>完全に消えることは、ない。明日も〆切はある。査読も、リジェクションも、競争資金の審査も。でも今この瞬間だけ、YRNは<em>沈黙した。</em></p>
+
+    <div class="status-list">
+      <span class="status-tag good">✓ YRN 撃退成功</span>
+      <span class="status-tag good">✓ TOYA & KANA 生存</span>
+      <span class="status-tag neu">▲ YRNは倒せない。ただ、今日は負けなかった。</span>
+    </div>
+
+  </article>
+
+  <div class="div-line"><span>// RETURN TO LAB</span></div>
+
+  <!-- EPILOGUE -->
+  <article class="chapter epilogue">
+    <div class="chapter-header">
+      <span class="chapter-num">EPILOGUE</span>
+      <h2 class="chapter-title">「収束」</h2>
+    </div>
+
+    <p>午前六時四十三分。</p>
+    <p>研究室に戻ったTOYAは、静かにキーボードに指を乗せた。</p>
+    <p>昨夜のエラーログが画面に残っていた。でも今のTOYAには、それが昨夜と違って見えた。</p>
+    <p><em>エラーの一行目に、目が止まる。</em></p>
+    <p><code style="font-family:'Share Tech Mono',monospace; color:var(--accent); font-size:13px;">NullPointerException at line 247</code></p>
+    <p>「……あっ、そういうことか」</p>
+    <p>TOYAの指が動き始めた。</p>
+
+    <div class="terminal">
+      <div><span class="prompt">$ </span>python train.py --resume</div>
+      <div class="out">Loading checkpoint...</div>
+      <div class="out">Epoch 1/50: loss=2.341</div>
+      <div class="out">Epoch 10/50: loss=0.891</div>
+      <div class="out">Epoch 50/50: loss=0.023</div>
+      <div class="ok">✅ All tests passed. (24/24)</div>
+      <div class="ok">✅ Paper ready for submission.</div>
+      <br>
+      <div class="out">// YRNは消えていない。また来る。</div>
+      <div class="out">// でも今日は、負けなかった。</div>
+      <div class="out">// それで充分だ。</div>
+    </div>
+
+    <p>研究室に静寂が戻った。TOYAはキーボードから手を離し、窓の外を見た。朝焼けが空を橙に染めていた。</p>
+    <p>KANAが差し入れを置いていった。からあげクン、レッド。</p>
+    <p>TOYAは口を押さえた。泣くまいとした。少し、失敗した。</p>
+    <p>それで充分だ、とTOYAは思った。</p>
+
+    <div style="margin-top:48px; text-align:center; font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:0.3em; color:var(--text-dim);">
+      〈 了 〉<br><br>
+      <span style="font-size:9px; opacity:0.5;">TO ALL RESEARCHERS WHO REFUSED TO YIELD TODAY</span>
+    </div>
+  </article>
+
+</main>
+
+<footer>
+  TOYA vs YRN &nbsp;|&nbsp; A Research Fantasy &nbsp;|&nbsp; Information Science Dept.<br>
+  <span style="opacity:0.4; font-size:9px;">「先行研究との差別化は、生き延びることだ」</span>
+</footer>
+
+<script>
+  // HP bar animations on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        if (el.classList.contains('yrn-appear')) {
+          setTimeout(() => {
+            document.getElementById('yrnHp').style.transition = 'width 2s ease';
+          }, 300);
+        }
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('.yrn-appear').forEach(el => observer.observe(el));
+
+  // Glitch effect on YRN name
+  const yrnName = document.querySelector('.yrn-name');
+  if (yrnName) {
+    setInterval(() => {
+      if (Math.random() < 0.15) {
+        yrnName.style.transform = `translateX(${(Math.random()-0.5)*6}px)`;
+        yrnName.style.opacity = 0.7 + Math.random() * 0.3;
+        setTimeout(() => {
+          yrnName.style.transform = '';
+          yrnName.style.opacity = 1;
+        }, 80);
+      }
+    }, 400);
+  }
+</script>
+
+</body>
+</html>

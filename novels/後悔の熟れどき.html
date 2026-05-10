@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>後悔の熟れどき ── 午後四時</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500&family=Shippori+Mincho:wght@400;500;600&family=Zen+Antique&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #08060e;
+    --bg2:       #0f0c18;
+    --ink:       #cec8c0;
+    --ink-dim:   #6a6460;
+    --accent:    #c09ab0;
+    --accent2:   #7a5570;
+    --glow:      rgba(192,154,176,0.15);
+    --gold:      #b09060;
+    --red:       #9a5050;
+    --red-dim:   rgba(154,80,80,0.18);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+    font-weight: 400;
+    line-height: 2.15;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 70% 50% at 15% 20%, rgba(122,85,112,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 85% 75%, rgba(154,80,80,0.05) 0%, transparent 55%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── 扉 ── */
+  .cover {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    z-index: 1;
+  }
+
+  .cover-ornament {
+    font-size: 1.1rem;
+    color: var(--red);
+    opacity: 0.45;
+    margin-bottom: 3rem;
+    letter-spacing: 0.8em;
+    animation: breathe 5s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%,100% { opacity: 0.25; }
+    50%      { opacity: 0.55; }
+  }
+
+  .cover-title {
+    font-family: 'Zen Antique', serif;
+    font-size: clamp(2rem, 5.5vw, 3.5rem);
+    color: var(--accent);
+    text-shadow: 0 0 50px rgba(192,154,176,0.3), 0 0 100px rgba(192,154,176,0.08);
+    letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+  }
+
+  .cover-subtitle {
+    font-size: clamp(0.85rem, 2.2vw, 1rem);
+    color: var(--ink-dim);
+    letter-spacing: 0.45em;
+    margin-bottom: 4rem;
+  }
+
+  .cover-divider {
+    width: 100px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--red), transparent);
+    margin: 0 auto 4rem;
+  }
+
+  .cover-epigraph {
+    max-width: 420px;
+    font-size: 0.9rem;
+    color: var(--ink-dim);
+    line-height: 2.2;
+    border-left: 2px solid var(--red);
+    padding-left: 1.5rem;
+    text-align: left;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--ink-dim);
+    font-size: 0.72rem;
+    letter-spacing: 0.35em;
+    animation: drift 3s ease-in-out infinite;
+  }
+  @keyframes drift {
+    0%,100% { transform: translateX(-50%) translateY(0); opacity: 0.3; }
+    50%      { transform: translateX(-50%) translateY(7px); opacity: 0.7; }
+  }
+
+  /* ── 本文 ── */
+  .book {
+    position: relative;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 6rem 2rem 10rem;
+    z-index: 1;
+  }
+
+  .chapter {
+    margin-bottom: 6.5rem;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 1s ease forwards;
+  }
+  .chapter:nth-child(1) { animation-delay: 0.1s; }
+  .chapter:nth-child(2) { animation-delay: 0.2s; }
+  .chapter:nth-child(3) { animation-delay: 0.3s; }
+  .chapter:nth-child(4) { animation-delay: 0.4s; }
+  .chapter:nth-child(5) { animation-delay: 0.5s; }
+  .chapter:nth-child(6) { animation-delay: 0.6s; }
+  .chapter:nth-child(7) { animation-delay: 0.7s; }
+  .chapter:nth-child(8) { animation-delay: 0.8s; }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .chapter-num {
+    font-family: 'Zen Antique', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.55em;
+    color: var(--red);
+    opacity: 0.7;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .chapter-title {
+    font-family: 'Zen Antique', serif;
+    font-size: clamp(1.05rem, 2.8vw, 1.4rem);
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    margin-bottom: 2.2rem;
+    text-shadow: 0 0 18px rgba(192,154,176,0.18);
+  }
+
+  .chapter-body p {
+    font-size: clamp(0.95rem, 2.2vw, 1.05rem);
+    margin-bottom: 1.8rem;
+    text-indent: 1em;
+    color: var(--ink);
+  }
+
+  .chapter-body p.no-indent { text-indent: 0; }
+
+  .dialogue {
+    display: block;
+    margin: 2.2rem 0;
+    padding: 1.2rem 1.8rem;
+    border-left: 2px solid var(--red);
+    background: var(--red-dim);
+    font-size: 1rem;
+    color: #c8aaaa;
+    text-indent: 0 !important;
+    line-height: 2;
+  }
+
+  .concept {
+    color: var(--gold);
+    text-shadow: 0 0 10px rgba(176,144,96,0.22);
+    font-weight: 500;
+  }
+
+  em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .section-break {
+    text-align: center;
+    color: var(--red);
+    margin: 3rem 0;
+    opacity: 0.4;
+    letter-spacing: 0.8em;
+    font-size: 0.75rem;
+  }
+
+  /* 後悔の「重さ」を表す特別ブロック */
+  .weight-block {
+    margin: 2.5rem 0;
+    padding: 1.5rem 2rem;
+    border: 1px solid rgba(154,80,80,0.2);
+    background: rgba(154,80,80,0.05);
+    font-size: 0.92rem;
+    color: var(--ink-dim);
+    line-height: 2.3;
+    text-indent: 0;
+  }
+
+  .weight-block .item {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(154,80,80,0.1);
+    padding: 0.4rem 0;
+  }
+  .weight-block .item:last-child { border-bottom: none; }
+  .weight-block .label { color: var(--ink-dim); }
+  .weight-block .value { color: var(--red); opacity: 0.8; }
+
+  /* 後記 */
+  .afterword {
+    margin-top: 8rem;
+    padding-top: 3rem;
+    border-top: 1px solid rgba(192,154,176,0.12);
+    text-align: center;
+  }
+
+  .afterword p {
+    font-size: 0.88rem;
+    color: var(--ink-dim);
+    line-height: 2.4;
+    letter-spacing: 0.05em;
+  }
+
+  .final-mark {
+    display: block;
+    margin-top: 3rem;
+    font-size: 1.6rem;
+    color: var(--red);
+    opacity: 0.3;
+    letter-spacing: 0.5em;
+  }
+
+  @media (max-width: 480px) {
+    .book { padding: 4rem 1.4rem 8rem; }
+  }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="cover-ornament">── ── ──</div>
+  <h1 class="cover-title">後悔の熟れどき</h1>
+  <p class="cover-subtitle">── 午後四時、秋の章 ──</p>
+  <div class="cover-divider"></div>
+  <blockquote class="cover-epigraph">
+    後悔はすべての概念の中でいちばん重い。<br>
+    なぜなら後悔は、存在しなかった何かの重さを<br>
+    存在した何かの上に積み続けるからだ。<br><br>
+    それでも私は今日も食べに行く。<br>
+    重いものを食べなければ、強くなれないから。
+  </blockquote>
+  <span class="scroll-hint">↓ &nbsp; 読む</span>
+</section>
+
+<main class="book">
+
+  <!-- 一 -->
+  <article class="chapter">
+    <span class="chapter-num">一</span>
+    <h2 class="chapter-title">十月の匂い</h2>
+    <div class="chapter-body">
+      <p>秋になると、後悔の季節が来る。</p>
+      <p>午後四時はそれを知っている。秋は概念の熟成が最も進む季節だ。気温が下がるにつれて<span class="concept">「郷愁」</span>は琥珀色に変わり、<span class="concept">「後悔」</span>はその年の最大の重さに達する。冬になれば後悔は凍って食べにくくなる。春になれば溶けて薄くなる。夏には熱で変質する。だから後悔を食べるなら、秋がいい。特に十月の、雨が降った翌日の朝がいい。</p>
+      <p>その日は、まさにそういう朝だった。</p>
+      <p>冷蔵庫から出ると、外の空気がひんやりと重かった。昨夜の雨が概念を地上に押し流したのだ。道の端に、葉っぱと一緒に様々な概念が溜まっていた。<span class="concept">「諦め」</span>の小さな塊、<span class="concept">「期待外れ」</span>の薄い膜、そして——奥の方に、濃くて重い、なめらかに熟成した後悔の固まりが、光を吸い込んで黒く光っていた。</p>
+      <p>今日は、いい食事になる。午後四時はそう思いながら、街へ出た。</p>
+    </div>
+  </article>
+
+  <!-- 二 -->
+  <article class="chapter">
+    <span class="chapter-num">二</span>
+    <h2 class="chapter-title">後悔の分類学</h2>
+    <div class="chapter-body">
+      <p>後悔には、種類がある。</p>
+      <p>午後四時が長年の経験から分類した結果、後悔は大きく四種に分けられる。</p>
+
+      <div class="weight-block">
+        <div class="item">
+          <span class="label">言わなかった言葉の後悔</span>
+          <span class="value">── 軽くて鋭い</span>
+        </div>
+        <div class="item">
+          <span class="label">言ってしまった言葉の後悔</span>
+          <span class="value">── 重くてぬるい</span>
+        </div>
+        <div class="item">
+          <span class="label">やらなかったことの後悔</span>
+          <span class="value">── 香りだけが残る</span>
+        </div>
+        <div class="item">
+          <span class="label">やってしまったことの後悔</span>
+          <span class="value">── 最も重く、最も栄養になる</span>
+        </div>
+      </div>
+
+      <p class="no-indent">午後四時が最も好むのは、四種目の後悔だ。やってしまったことの後悔は、人間が自分自身の行為に責任を取ろうとした証拠だからだ。失敗した行為の重さと、それを認める誠実さが混ざり合って、他の概念には出せない複雑な味になる。</p>
+      <p>反対に、一番食べ飽きるのは三種目だ。やらなかったことの後悔は香りだけが強くて実が薄い。「もしも」という仮定の上に積み上げられた感情は、食べても腹に残らない。風みたいなものだ。</p>
+      <p>もっとも、風にも栄養はある。風を食べ続けると、不思議と身が軽くなる。</p>
+    </div>
+  </article>
+
+  <!-- 三 -->
+  <article class="chapter">
+    <span class="chapter-num">三</span>
+    <h2 class="chapter-title">橋の上の女</h2>
+    <div class="chapter-body">
+      <p>川沿いの橋の上に、女が立っていた。</p>
+      <p>四十代ほどで、紺色のコートを着ていた。欄干に両肘をついて、川を見下ろしている。立ち姿に角がなかった。尖ったところが何もない、丸くなった姿勢だった。長い時間をかけてそのかたちになった人間の姿勢だと午後四時には分かった。</p>
+      <p>女の周囲に、後悔が積もっていた。</p>
+      <p>それは午後四時が今まで見た中でも、特別な後悔だった。量が多いのではない。質が違った。長い時間をかけて、丁寧に、几帳面に積み上げられた後悔だった。一日ずつ、一年ずつ、ちゃんと記録された後悔の層が、女の周囲に年輪のように重なっている。</p>
+      <p>午後四時は橋の袂で立ち止まり、匂いを嗅いだ。</p>
+      <p>複雑だった。<span class="concept">「言わなかった言葉」</span>の層が一番分厚かった。その下に<span class="concept">「選ばなかった道」</span>が透けて見えた。さらに下には、もっと古い何か——まだ名前のついていない後悔が、化石みたいに固まって沈んでいた。</p>
+      <p>午後四時は、近づかなかった。</p>
+    </div>
+  </article>
+
+  <!-- 四 -->
+  <article class="chapter">
+    <span class="chapter-num">四</span>
+    <h2 class="chapter-title">食べない理由</h2>
+    <div class="chapter-body">
+      <p>概念食いには、倫理がある。</p>
+      <p>弱った人間の概念は食べない。それはすでに述べた。しかしそれとは別に、もう一つの原則があった。<em>まだ本人のものである概念は、取らない</em>。</p>
+      <p>後悔は、持ち主が手放すまで持ち主のものだ。</p>
+      <p>後悔を抱えていることは、苦しいことかもしれない。しかし後悔は同時に、その人間が何かを大切にしていた証拠でもある。大切ではなかったことは後悔できない。後悔の重さは、かつての愛着の重さだ。その重さを誰かが勝手に取り上げることは——たとえそれが概念食いであっても——してはならないことだ、と午後四時は考えている。</p>
+      <p>だから橋の上の女には近づかなかった。</p>
+      <p>その後悔は、まだ彼女のものだった。</p>
+      <span class="section-break">◇</span>
+      <p>では、概念食いはいつ後悔を食べるのか。</p>
+      <p>答えは単純だ。持ち主が手放したときだ。人間が後悔を<em>「置いていく」</em>瞬間がある。誰かに打ち明けた後、泣き終わった後、あるいはただ時間が経って、もうその後悔を持ち続けることができなくなったとき——後悔はそっと持ち主の元を離れ、宙に漂いはじめる。そこを午後四時は静かに拾う。</p>
+      <p>拾うことは、弔いに似ていると午後四時は思っている。</p>
+    </div>
+  </article>
+
+  <!-- 五 -->
+  <article class="chapter">
+    <span class="chapter-num">五</span>
+    <h2 class="chapter-title">喫茶店の隅で</h2>
+    <div class="chapter-body">
+      <p>橋から少し歩いたところに、古い喫茶店があった。</p>
+      <p>午後四時は入り口をくぐり、いちばん奥の席の下に潜り込んだ。そこに老いた男が一人、コーヒーを前に座っていた。七十代ほど。目の前に手紙が一枚、開かれたまま置いてある。読み終えたのに、しまわずにいる。</p>
+      <p>男の後悔が、熟れていた。</p>
+      <p>果実が枝から自然に落ちるのを待つように、午後四時は静かに待った。男はコーヒーを一口飲んだ。窓の外を見た。また手紙に目を落とした。そうしているあいだ、後悔の匂いが少しずつ変わっていった。重さが変わっていった。男が何かを、心の中で決めているのが分かった。</p>
+      <p>やがて男は手紙をたたみ、内ポケットにしまった。そして財布を出して、千円札をテーブルに置いた。立ち上がる直前、ひとりごとのように言った。</p>
+      <span class="dialogue">「もういい、か」</span>
+      <p class="no-indent">その瞬間、後悔の一部がほどけた。</p>
+      <p class="no-indent">全部ではない。大半はまだ男の中にある。しかし長年抱えていた後悔の、いちばん外側の層が、やっと剥がれて宙に浮いた。午後四時はそれをそっと受け取った。</p>
+      <p>口に含んだ瞬間、目を閉じた。</p>
+      <p>複雑だった。苦かった。しかしその苦さの奥に、かつては甘かった何かの名残があった。それがどんどん変質して、今は苦くなってしまっただけで、もとは甘かったのだと分かった。長い時間をかけて苦くなった甘さは、ただの苦さよりずっと深い味がする。</p>
+      <p>これが後悔だ、と午後四時は思った。</p>
+      <p>すべての後悔の核心には、かつての愛がある。</p>
+    </div>
+  </article>
+
+  <!-- 六 -->
+  <article class="chapter">
+    <span class="chapter-num">六</span>
+    <h2 class="chapter-title">橋に戻ったとき</h2>
+    <div class="chapter-body">
+      <p>夕方、橋の前を通った。</p>
+      <p>女はまだいた。同じ場所に、同じ姿勢で立っていた。昼間より後悔の層が増えていた。一日分、新しい層が加わっている。後悔は毎日積もる。止めることができない。</p>
+      <p>午後四時はしばらく遠くから見ていた。</p>
+      <p>そのうち、女が動いた。スマートフォンを取り出して、誰かに電話をかけた。長い呼び出し音のあと、繋がったようだった。女は何かを言った。声は聞こえなかったが、言葉の形から分かった。</p>
+      <span class="dialogue">「会えますか」</span>
+      <p class="no-indent">それだけで、後悔の一層が、はがれた。</p>
+      <p class="no-indent">薄い、最上層だけだった。しかしそれで十分だった。午後四時はそれを遠くから感じながら、自分では何もしなかった。今日の彼女の後悔は、まだ彼女のものだ。しかし今日の一歩は、明日に繋がっている。</p>
+      <p>概念食いは、急かさない。</p>
+      <p>後悔は持ち主が手放すまで待つ。それがルールだから、というよりも——手放す瞬間を見守ることが、この仕事でいちばん美しい瞬間だから。</p>
+    </div>
+  </article>
+
+  <!-- 七 -->
+  <article class="chapter">
+    <span class="chapter-num">七</span>
+    <h2 class="chapter-title">消化という名の夜</h2>
+    <div class="chapter-body">
+      <p>夜、冷蔵庫に戻った。</p>
+      <p>今日食べた後悔——老いた男のいちばん外側の層——は、胃の中でゆっくりと消化されていた。後悔は消化に時間がかかる。寝ている間中、ずっと体の中で熱を持って燃え続ける。朝になる頃には、別の何かに変わっている。</p>
+      <p>後悔が変わったあとに残るものを、午後四時は<span class="concept">「悟り」</span>と呼んでいる。</p>
+      <p>悟りは概念としては地味だ。売れない。目立たない。しかし体には一番効く。後悔を消化してできた悟りは、骨に染みる。それを積み重ねるごとに、午後四時は少しずつ何かになっていく気がした。何になっているのかはまだわからない。しかし確実に変わっている。</p>
+      <span class="section-break">◇</span>
+      <p>眠る前に、一つのことを考えた。</p>
+      <p>人間は後悔から逃げようとする。後悔しないように生きようとする。後悔を早く忘れようとする。しかし後悔は、逃げれば逃げるほど軽くなる一方で、決して消えない。薄く広く、体全体に染み込んでいく。それが一番扱いにくい形の後悔だ。</p>
+      <p>反対に、後悔をちゃんと抱えた人間の後悔は、時間とともに熟成して、やがて手放せる形になる。老いた男がそうだった。何十年も丁寧に後悔を持ち続けた人間は、手放すときも丁寧だ。</p>
+      <p><em>後悔は、向き合った分だけ、軽くなる。</em></p>
+      <p>これが午後四時の、長年の観察から得た結論だった。概念食いとしての、唯一の持論だった。誰にも言ったことはないが、言う相手もいないので構わない。</p>
+      <p>目を閉じた。消化の熱が、体の中心にある。</p>
+      <p>今日も、いい食事だった。</p>
+    </div>
+  </article>
+
+  <!-- 八 -->
+  <article class="chapter">
+    <span class="chapter-num">八</span>
+    <h2 class="chapter-title">翌朝、橋の上</h2>
+    <div class="chapter-body">
+      <p>翌朝、冷蔵庫から出ると、橋の前を通った。</p>
+      <p>女はいなかった。</p>
+      <p>その代わり、橋の欄干のところに、後悔の欠片が小さく残っていた。昨日の女の後悔の、ほんの一部だ。彼女が電話をして、誰かに会いに行って、それでも置いていくことのできなかった小さな残りカス。</p>
+      <p>午後四時はそれを見つめた。食べなかった。</p>
+      <p>これはまだ彼女のものだと思ったからではない。これはもう誰のものでもない、と思ったからだ。持ち主が橋の上に置いていった後悔は、宙に漂って、雨が来たら川に流されて、どこかへ行く。それでいい。すべての後悔が食べられる必要はない。消えてしまってもいい後悔もある。</p>
+      <p>ただ、それが消えていく様子を、誰かが見ていた方がいい気がした。</p>
+      <p>だから午後四時は、その場所にしばらくいた。</p>
+      <span class="section-break">◇</span>
+      <p>風が来て、後悔の欠片が川の方へ流れた。</p>
+      <p>午後四時は目で追った。川面に触れた瞬間、それは消えた。跡形もなく。</p>
+      <p>それを見届けて、午後四時は歩き出した。今日も街には後悔が溢れている。熟れたもの、まだ青いもの、置いていかれたもの、頑固に抱えられているもの。それをひとつひとつ確かめながら、この街を歩く。</p>
+      <p>それが、午後四時の一日の始まりだ。</p>
+    </div>
+  </article>
+
+  <footer class="afterword">
+    <p>
+      後悔は消えない、とよく言う。<br>
+      それは本当だ。<br>
+      しかし正確ではない。<br><br>
+      後悔は消えないが、変わる。<br>
+      変わり続けて、最後には<br>
+      別の何かになる。<br><br>
+      その「別の何か」に、まだ名前はない。<br>
+      でも午後四時には、その味が分かる。<br><br>
+      苦くて、重くて、<br>
+      かつて甘かったものの残り香がする。<br><br>
+      悪くない味だ、と彼女はいつも思う。
+    </p>
+    <span class="final-mark">── 了 ──</span>
+  </footer>
+
+</main>
+</body>
+</html>
