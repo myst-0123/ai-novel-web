@@ -209,6 +209,12 @@ app.post('/api/comments/:id(*)', async (req, res) => {
     res.status(201).json({ ...newComment, createdAt: new Date().toISOString() });
   } catch (err) {
     console.error('/api/comments POST エラー:', err);
+    // Firestore gRPC NOT_FOUND (code 5): データベース未作成
+    if (err.code === 5 || (err.message && err.message.includes('NOT_FOUND'))) {
+      return res.status(503).json({
+        error: 'Firestoreデータベースが見つかりません。Firebase ConsoleでFirestoreを有効化してください。',
+      });
+    }
     res.status(500).json({ error: err.message });
   }
 });
