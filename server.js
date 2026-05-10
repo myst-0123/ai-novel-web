@@ -4,14 +4,13 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
+import { Readable } from 'stream';
 import multer from 'multer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ── Firebase 初期化（任意）────────────────────────────────────
-// FIREBASE_SERVICE_ACCOUNT が設定されている場合のみ Firestore を有効化
-// 未設定の場合はコメント機能なしで動作する
 let db = null;
 let FieldValue = null;
 
@@ -20,7 +19,6 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     const { initializeApp, cert, getApps } = await import('firebase-admin/app');
     const firestoreModule = await import('firebase-admin/firestore');
     FieldValue = firestoreModule.FieldValue;
-
     if (!getApps().length) {
       const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
       initializeApp({ credential: cert(serviceAccount) });
@@ -34,13 +32,39 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   console.warn('⚠️  FIREBASE_SERVICE_ACCOUNT 未設定 — コメント機能は無効です');
 }
 
+// ── Google Drive 初期化（任意）────────────────────────────────
+let drive = null;
+const DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID || null;
+// ローカル開発用フォールバック
+const NOVELS_DIR = path.join(__dirname, 'novels');
+
+if (process.env.GOOGLE_SERVICE_ACCOUNT && DRIVE_FOLDER_ID) {
+  try {
+    const { google } = await import('googleapis');
+    const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
+    const auth = new google.auth.GoogleAuth({
+      credentials: serviceAccount,
+      scopes: ['https://www.googleapis.com/auth/drive'],
+    });
+    drive = google.drive({ version: 'v3', auth });
+    console.log('✅ Google Drive 接続完了');
+  } catch (err) {
+    console.error('⚠️  Google Drive 初期化失敗（ローカルフォルダを使用）:', err.message);
+  }
+} else {
+  console.warn('⚠️  GOOGLE_SERVICE_ACCOUNT/GOOGLE_DRIVE_FOLDER_ID 未設定 — ローカルフォルダを使用');
+}
+
 // ── Express 設定 ─────────────────────────────────────────────
 const app = express();
 const PORT = process.env.PORT || 5000;
-const NOVELS_DIR = path.join(__dirname, 'novels');
 
 app.use(express.json());
-app.use('/novels', express.static(NOVELS_DIR));
+
+// Drive 未設定時はローカルフォルダを静的配信（開発用フォールバック）
+if (!drive) {
+  app.use('/novels', express.static(NOVELS_DIR));
+}
 
 // ── multer（ファイルアップロード）────────────────────────────
 const upload = multer({
@@ -55,7 +79,7 @@ const upload = multer({
   },
 });
 
-// ファイル名に使えない文字を除去（パストラバーサル対策込み）
+// ファイル名サニタイズ（パストラバーサル対策）
 function sanitizeFilename(str) {
   return String(str)
     .trim()
@@ -65,7 +89,7 @@ function sanitizeFilename(str) {
     .slice(0, 200);
 }
 
-// NOVELS_DIR の外に出ないことを保証するパス結合
+// ローカル用: NOVELS_DIR の外に出ないことを保証
 function safeJoin(base, ...parts) {
   const resolved = path.resolve(base, ...parts);
   if (!resolved.startsWith(path.resolve(base) + path.sep) &&
@@ -86,7 +110,6 @@ function toDocId(str) {
   return str.replace(/\//g, '__SLASH__');
 }
 
-// Firestore からコメント取得（未接続なら空配列を返す）
 async function fetchComments(novelId) {
   if (!db) return [];
   try {
@@ -101,7 +124,6 @@ async function fetchComments(novelId) {
       return {
         id: d.id,
         ...data,
-        // Firestore Timestamp → ISO 文字列に変換してクライアントに渡す
         createdAt: data.createdAt?.toDate?.()?.toISOString() ?? null,
       };
     });
@@ -111,8 +133,102 @@ async function fetchComments(novelId) {
   }
 }
 
-// novels ディレクトリをスキャンし、評価情報を付与して返す
+// ── Google Drive ユーティリティ ───────────────────────────────
+async function listDriveFiles(folderId) {
+  const res = await drive.files.list({
+    q: `'${folderId}' in parents and trashed = false`,
+    fields: 'files(id, name, mimeType)',
+    orderBy: 'name',
+    pageSize: 1000,
+  });
+  return res.data.files || [];
+}
+
+// ── novels キャッシュ（Drive モード用）───────────────────────
+let novelCache = null;
+let novelCacheTime = 0;
+const CACHE_TTL = 60 * 1000; // 1分
+
+// ── scanNovels ────────────────────────────────────────────────
 async function scanNovels() {
+
+  // ── Google Drive モード ──────────────────────────────────────
+  if (drive) {
+    const now = Date.now();
+    if (novelCache && now - novelCacheTime < CACHE_TTL) return novelCache;
+
+    const novels = [];
+    const entries = await listDriveFiles(DRIVE_FOLDER_ID);
+    const novelIds = [];
+
+    for (const entry of entries) {
+      if (entry.mimeType === 'application/vnd.google-apps.folder') {
+        novelIds.push(entry.name);
+      } else if (entry.name.toLowerCase().endsWith('.html')) {
+        novelIds.push(entry.name.replace(/\.html$/i, ''));
+      }
+    }
+
+    const commentStats = await Promise.all(
+      novelIds.map(async id => {
+        const comments = await fetchComments(id);
+        return { id, count: comments.length, avg: avgRating(comments) };
+      })
+    );
+    const statsMap = Object.fromEntries(commentStats.map(s => [s.id, s]));
+
+    for (const entry of entries) {
+      if (entry.mimeType === 'application/vnd.google-apps.folder') {
+        // 連載
+        const seriesFiles = await listDriveFiles(entry.id);
+        const episodes = [];
+        for (const file of seriesFiles) {
+          if (!file.name.toLowerCase().endsWith('.html')) continue;
+          const nameWithoutExt = file.name.replace(/\.html$/i, '');
+          const lastUnderscore = nameWithoutExt.lastIndexOf('_');
+          if (lastUnderscore === -1) continue;
+          const episodeTitle = nameWithoutExt.substring(0, lastUnderscore);
+          const episodeNum = parseInt(nameWithoutExt.substring(lastUnderscore + 1), 10);
+          episodes.push({
+            fileId: nameWithoutExt,
+            title: episodeTitle,
+            number: isNaN(episodeNum) ? 0 : episodeNum,
+            htmlPath: `/api/content/${file.id}`,
+          });
+        }
+        episodes.sort((a, b) => a.number - b.number);
+        const id = entry.name;
+        const stats = statsMap[id] || { count: 0, avg: null };
+        novels.push({
+          id,
+          title: id,
+          type: 'series',
+          episodes,
+          episodeCount: episodes.length,
+          commentCount: stats.count,
+          avgRating: stats.avg,
+        });
+      } else if (entry.name.toLowerCase().endsWith('.html')) {
+        // 単発
+        const id = entry.name.replace(/\.html$/i, '');
+        const stats = statsMap[id] || { count: 0, avg: null };
+        novels.push({
+          id,
+          title: id,
+          type: 'single',
+          htmlPath: `/api/content/${entry.id}`,
+          commentCount: stats.count,
+          avgRating: stats.avg,
+        });
+      }
+    }
+
+    novelCache = novels;
+    novelCacheTime = now;
+    return novels;
+  }
+
+  // ── ローカルフォールバック ────────────────────────────────────
   const novels = [];
   if (!fs.existsSync(NOVELS_DIR)) return novels;
 
@@ -127,7 +243,6 @@ async function scanNovels() {
     }
   }
 
-  // コメント集計を並列取得
   const commentStats = await Promise.all(
     novelIds.map(async id => {
       const comments = await fetchComments(id);
@@ -169,7 +284,6 @@ async function scanNovels() {
         }
       } catch {}
       episodes.sort((a, b) => a.number - b.number);
-
       const id = entry.name;
       const stats = statsMap[id] || { count: 0, avg: null };
       novels.push({
@@ -209,6 +323,22 @@ app.get('/api/novels/:id(*)', async (req, res) => {
   }
 });
 
+// Drive からHTMLコンテンツを配信
+app.get('/api/content/:fileId', async (req, res) => {
+  if (!drive) return res.status(503).send('Google Drive 未設定');
+  try {
+    const response = await drive.files.get(
+      { fileId: req.params.fileId, alt: 'media' },
+      { responseType: 'stream' }
+    );
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    response.data.pipe(res);
+  } catch (err) {
+    console.error('/api/content エラー:', err.message);
+    res.status(404).send('ファイルが見つかりません');
+  }
+});
+
 app.get('/api/comments/:id(*)', async (req, res) => {
   try {
     const comments = await fetchComments(decodeURIComponent(req.params.id));
@@ -224,11 +354,9 @@ app.post('/api/comments/:id(*)', async (req, res) => {
   }
   try {
     const { name, rating, comment } = req.body;
-    // comment のみ必須。name は空なら「名無し」、rating は任意
     if (!comment) {
       return res.status(400).json({ error: 'コメントを入力してください' });
     }
-
     const resolvedName = (name && String(name).trim())
       ? String(name).trim().slice(0, 50)
       : '名無し';
@@ -241,7 +369,6 @@ app.post('/api/comments/:id(*)', async (req, res) => {
       createdAt: FieldValue.serverTimestamp(),
     };
 
-    // 評価が送られた場合のみ保存
     if (rating !== undefined && rating !== null) {
       const ratingNum = parseInt(rating, 10);
       if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
@@ -260,7 +387,6 @@ app.post('/api/comments/:id(*)', async (req, res) => {
     res.status(201).json({ ...newComment, createdAt: new Date().toISOString() });
   } catch (err) {
     console.error('/api/comments POST エラー:', err);
-    // Firestore gRPC NOT_FOUND (code 5): データベース未作成
     if (err.code === 5 || (err.message && err.message.includes('NOT_FOUND'))) {
       return res.status(503).json({
         error: 'Firestoreデータベースが見つかりません。Firebase ConsoleでFirestoreを有効化してください。',
@@ -290,52 +416,96 @@ app.post('/api/upload', (req, res, next) => {
   }
 
   try {
-    if (type === 'series') {
-      // 連載話のアップロード
-      if (!seriesName || !seriesName.trim()) {
-        return res.status(400).json({ error: 'シリーズ名を入力してください' });
-      }
-      if (!episodeTitle || !episodeTitle.trim()) {
-        return res.status(400).json({ error: '話タイトルを入力してください' });
-      }
-      const epNum = parseInt(episodeNumber, 10);
-      if (isNaN(epNum) || epNum < 1) {
-        return res.status(400).json({ error: '話番号を正しく入力してください（1以上の整数）' });
+    if (drive) {
+      // ── Google Drive へアップロード ──────────────────────────
+      if (type === 'series') {
+        if (!seriesName || !seriesName.trim())
+          return res.status(400).json({ error: 'シリーズ名を入力してください' });
+        if (!episodeTitle || !episodeTitle.trim())
+          return res.status(400).json({ error: '話タイトルを入力してください' });
+        const epNum = parseInt(episodeNumber, 10);
+        if (isNaN(epNum) || epNum < 1)
+          return res.status(400).json({ error: '話番号を正しく入力してください（1以上の整数）' });
+
+        const safeSeriesName = sanitizeFilename(seriesName.trim());
+        const safeEpTitle = sanitizeFilename(episodeTitle.trim());
+        const filename = `${safeEpTitle}_${epNum}.html`;
+
+        // サブフォルダを検索または作成
+        const folderSearch = await drive.files.list({
+          q: `'${DRIVE_FOLDER_ID}' in parents and name = '${safeSeriesName}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+          fields: 'files(id)',
+        });
+        let folderId;
+        if (folderSearch.data.files.length > 0) {
+          folderId = folderSearch.data.files[0].id;
+        } else {
+          const folder = await drive.files.create({
+            requestBody: {
+              name: safeSeriesName,
+              mimeType: 'application/vnd.google-apps.folder',
+              parents: [DRIVE_FOLDER_ID],
+            },
+            fields: 'id',
+          });
+          folderId = folder.data.id;
+        }
+
+        await drive.files.create({
+          requestBody: { name: filename, parents: [folderId] },
+          media: { mimeType: 'text/html', body: Readable.from(req.file.buffer) },
+          fields: 'id',
+        });
+
+        novelCache = null; // キャッシュクリア
+        return res.status(201).json({ message: 'アップロード完了', path: `${safeSeriesName}/${filename}` });
+
+      } else {
+        const rawTitle = (title && title.trim())
+          ? title.trim()
+          : req.file.originalname.replace(/\.html$/i, '');
+        const safeTitle = sanitizeFilename(rawTitle);
+        const filename = `${safeTitle}.html`;
+
+        await drive.files.create({
+          requestBody: { name: filename, parents: [DRIVE_FOLDER_ID] },
+          media: { mimeType: 'text/html', body: Readable.from(req.file.buffer) },
+          fields: 'id',
+        });
+
+        novelCache = null; // キャッシュクリア
+        return res.status(201).json({ message: 'アップロード完了', path: filename });
       }
 
-      const safeSeriesName = sanitizeFilename(seriesName.trim());
-      const safeEpTitle = sanitizeFilename(episodeTitle.trim());
-      const filename = `${safeEpTitle}_${epNum}.html`;
-
-      const seriesDir = safeJoin(NOVELS_DIR, safeSeriesName);
-      if (!fs.existsSync(seriesDir)) {
-        fs.mkdirSync(seriesDir, { recursive: true });
-      }
-      const filePath = safeJoin(seriesDir, filename);
-      fs.writeFileSync(filePath, req.file.buffer);
-
-      return res.status(201).json({
-        message: 'アップロード完了',
-        path: `/novels/${safeSeriesName}/${filename}`,
-      });
     } else {
-      // 単発小説のアップロード
-      const rawTitle = (title && title.trim())
-        ? title.trim()
-        : req.file.originalname.replace(/\.html$/i, '');
-      const safeTitle = sanitizeFilename(rawTitle);
-      const filename = `${safeTitle}.html`;
-      const filePath = safeJoin(NOVELS_DIR, filename);
+      // ── ローカルフォールバック ────────────────────────────────
+      if (type === 'series') {
+        if (!seriesName || !seriesName.trim())
+          return res.status(400).json({ error: 'シリーズ名を入力してください' });
+        if (!episodeTitle || !episodeTitle.trim())
+          return res.status(400).json({ error: '話タイトルを入力してください' });
+        const epNum = parseInt(episodeNumber, 10);
+        if (isNaN(epNum) || epNum < 1)
+          return res.status(400).json({ error: '話番号を正しく入力してください（1以上の整数）' });
 
-      if (!fs.existsSync(NOVELS_DIR)) {
-        fs.mkdirSync(NOVELS_DIR, { recursive: true });
+        const safeSeriesName = sanitizeFilename(seriesName.trim());
+        const safeEpTitle = sanitizeFilename(episodeTitle.trim());
+        const filename = `${safeEpTitle}_${epNum}.html`;
+        const seriesDir = safeJoin(NOVELS_DIR, safeSeriesName);
+        if (!fs.existsSync(seriesDir)) fs.mkdirSync(seriesDir, { recursive: true });
+        fs.writeFileSync(safeJoin(seriesDir, filename), req.file.buffer);
+        return res.status(201).json({ message: 'アップロード完了', path: `${safeSeriesName}/${filename}` });
+
+      } else {
+        const rawTitle = (title && title.trim())
+          ? title.trim()
+          : req.file.originalname.replace(/\.html$/i, '');
+        const safeTitle = sanitizeFilename(rawTitle);
+        const filename = `${safeTitle}.html`;
+        if (!fs.existsSync(NOVELS_DIR)) fs.mkdirSync(NOVELS_DIR, { recursive: true });
+        fs.writeFileSync(safeJoin(NOVELS_DIR, filename), req.file.buffer);
+        return res.status(201).json({ message: 'アップロード完了', path: filename });
       }
-      fs.writeFileSync(filePath, req.file.buffer);
-
-      return res.status(201).json({
-        message: 'アップロード完了',
-        path: `/novels/${filename}`,
-      });
     }
   } catch (err) {
     console.error('/api/upload エラー:', err);
