@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { StarDisplay } from './StarRating';
+import CommentSection from './CommentSection';
 
 export default function SeriesIndex() {
   const { id } = useParams();
@@ -46,6 +47,9 @@ export default function SeriesIndex() {
             </li>
           ))}
         </ul>
+
+        {/* 作品全体へのコメント・評価（星評価あり） */}
+        <CommentSection novelId={id} showRating={true} />
       </div>
     </>
   );

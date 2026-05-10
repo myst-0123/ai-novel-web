@@ -182,22 +182,27 @@ app.post('/api/comments/:id(*)', async (req, res) => {
   }
   try {
     const { name, rating, comment } = req.body;
-    if (!name || !rating || !comment) {
+    // rating は任意（各話コメントは評価なし）
+    if (!name || !comment) {
       return res.status(400).json({ error: '必須項目が入力されていません' });
-    }
-    const ratingNum = parseInt(rating, 10);
-    if (ratingNum < 1 || ratingNum > 5) {
-      return res.status(400).json({ error: '評価は1〜5で入力してください' });
     }
 
     const novelId = decodeURIComponent(req.params.id);
     const newComment = {
       id: crypto.randomUUID(),
       name: String(name).slice(0, 50),
-      rating: ratingNum,
       comment: String(comment).slice(0, 1000),
       createdAt: FieldValue.serverTimestamp(),
     };
+
+    // 評価が送られた場合のみ保存
+    if (rating !== undefined && rating !== null) {
+      const ratingNum = parseInt(rating, 10);
+      if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+        return res.status(400).json({ error: '評価は1〜5で入力してください' });
+      }
+      newComment.rating = ratingNum;
+    }
 
     await db
       .collection('comments')

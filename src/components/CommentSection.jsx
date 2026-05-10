@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { StarDisplay, StarPicker } from './StarRating';
 
-export default function CommentSection({ novelId }) {
+// showRating=true  → 星評価あり（単発・連載全体用）
+// showRating=false → コメントのみ（各話用）
+export default function CommentSection({ novelId, showRating = true }) {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
@@ -15,16 +17,20 @@ export default function CommentSection({ novelId }) {
     setLoading(true);
     fetch(`/api/comments/${encodeURIComponent(novelId)}`)
       .then(r => r.json())
-      .then(data => { setComments(data); setLoading(false); })
+      .then(data => { setComments(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(() => setLoading(false));
   };
 
   useEffect(() => {
+    setComments([]);
+    setLoading(true);
     fetchComments();
   }, [novelId]);
 
-  const avgRating = comments.length
-    ? comments.reduce((s, c) => s + c.rating, 0) / comments.length
+  // 評価ありコメントのみで平均を計算
+  const ratedComments = comments.filter(c => c.rating != null);
+  const avgRating = showRating && ratedComments.length > 0
+    ? ratedComments.reduce((s, c) => s + c.rating, 0) / ratedComments.length
     : null;
 
   const handleSubmit = async (e) => {
@@ -32,15 +38,18 @@ export default function CommentSection({ novelId }) {
     setError('');
     setSuccess('');
     if (!name.trim()) return setError('名前を入力してください');
-    if (!rating) return setError('評価を選択してください');
+    if (showRating && !rating) return setError('評価を選択してください');
     if (!comment.trim()) return setError('コメントを入力してください');
+
+    const body = { name: name.trim(), comment: comment.trim() };
+    if (showRating && rating) body.rating = rating;
 
     setSubmitting(true);
     try {
       const res = await fetch(`/api/comments/${encodeURIComponent(novelId)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), rating, comment: comment.trim() }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         const d = await res.json();
@@ -59,21 +68,22 @@ export default function CommentSection({ novelId }) {
     }
   };
 
-  const formatDate = (iso) => {
-    const d = new Date(iso);
+  const formatDate = (val) => {
+    if (!val) return '';
+    const d = val?.toDate ? val.toDate() : new Date(val);
     return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
   };
 
   return (
     <div className="comment-section">
-      <h3>コメント・評価</h3>
+      <h3>{showRating ? 'コメント・評価' : 'この話へのコメント'}</h3>
 
       {avgRating !== null && (
         <div className="avg-rating-box">
           <div className="avg-big">{avgRating.toFixed(1)}</div>
           <div className="avg-detail">
             <StarDisplay rating={avgRating} size="lg" />
-            <small>{comments.length}件の評価</small>
+            <small>{ratedComments.length}件の評価</small>
           </div>
         </div>
       )}
@@ -92,10 +102,12 @@ export default function CommentSection({ novelId }) {
               maxLength={50}
             />
           </div>
-          <div className="form-group">
-            <label>評価</label>
-            <StarPicker value={rating} onChange={setRating} />
-          </div>
+          {showRating && (
+            <div className="form-group">
+              <label>評価</label>
+              <StarPicker value={rating} onChange={setRating} />
+            </div>
+          )}
         </div>
         <div className="form-group">
           <label>コメント</label>
@@ -124,7 +136,7 @@ export default function CommentSection({ novelId }) {
             <div key={c.id} className="comment-item">
               <div className="comment-meta">
                 <span className="comment-name">{c.name}</span>
-                <StarDisplay rating={c.rating} />
+                {c.rating != null && <StarDisplay rating={c.rating} />}
                 <span className="comment-date">{formatDate(c.createdAt)}</span>
               </div>
               <div className="comment-text">{c.comment}</div>

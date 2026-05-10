@@ -8,7 +8,7 @@ export default function SeriesViewer() {
   const [novel, setNovel] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const iframeRef = useRef(null);
+  const mainRef = useRef(null);
 
   useEffect(() => {
     fetch(`/api/novels/${encodeURIComponent(id)}`)
@@ -18,18 +18,19 @@ export default function SeriesViewer() {
   }, [id]);
 
   const currentNum = episode ? parseInt(episode, 10) : 1;
-
   const currentEp = novel?.episodes?.find(e => e.number === currentNum)
     ?? novel?.episodes?.[0];
-
   const currentIndex = novel?.episodes?.findIndex(e => e.number === currentNum) ?? 0;
   const prevEp = novel?.episodes?.[currentIndex - 1] ?? null;
   const nextEp = novel?.episodes?.[currentIndex + 1] ?? null;
 
+  // 各話のコメントID：シリーズID + "__ep__" + 話数
+  const episodeCommentId = `${id}__ep__${currentNum}`;
+
   const goToEp = (ep) => {
     setSidebarOpen(false);
     navigate(`/series/${encodeURIComponent(id)}/${ep.number}`);
-    iframeRef.current?.scrollIntoView({ behavior: 'smooth' });
+    mainRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   if (loading) return <div className="loading">読み込み中...</div>;
@@ -38,7 +39,7 @@ export default function SeriesViewer() {
   return (
     <>
       <header className="page-header">
-        <Link to="/" className="back-btn">← 一覧へ戻る</Link>
+        <Link to={`/series/${encodeURIComponent(id)}`} className="back-btn">← 話一覧へ</Link>
         <button className="back-btn sidebar-toggle" onClick={() => setSidebarOpen(o => !o)}>
           ☰ 話一覧
         </button>
@@ -76,7 +77,7 @@ export default function SeriesViewer() {
           </ul>
         </aside>
 
-        <main className="viewer-main" ref={iframeRef}>
+        <main className="viewer-main" ref={mainRef}>
           {currentEp ? (
             <iframe
               className="novel-iframe"
@@ -107,7 +108,8 @@ export default function SeriesViewer() {
             )}
           </nav>
 
-          <CommentSection novelId={id} />
+          {/* 各話コメント：評価なし・コメントのみ */}
+          <CommentSection novelId={episodeCommentId} showRating={false} />
         </main>
       </div>
     </>

@@ -149,13 +149,13 @@ body {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 8px;
 }
 .novel-row {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 16px 20px;
+  padding: 20px 24px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
