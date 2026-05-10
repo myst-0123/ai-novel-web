@@ -72,36 +72,41 @@ export default function TopPage() {
             {search ? `「${search}」に一致する小説が見つかりません` : '小説がまだありません。novels/ フォルダに HTML ファイルを追加してください。'}
           </div>
         ) : (
-          <div className="novel-grid">
+          <ul className="novel-list">
             {filtered.map(novel => (
-              <NovelCard key={novel.id} novel={novel} />
+              <NovelRow key={novel.id} novel={novel} />
             ))}
-          </div>
+          </ul>
         )}
       </div>
     </>
   );
 }
 
-function NovelCard({ novel }) {
+function NovelRow({ novel }) {
   const to = novel.type === 'series'
     ? `/series/${encodeURIComponent(novel.id)}`
     : `/novel/${encodeURIComponent(novel.id)}`;
 
   return (
-    <Link to={to} className="novel-card">
-      <span className={`card-badge ${novel.type}`}>
-        {novel.type === 'series' ? '連載' : '単発'}
-      </span>
-      <h2 className="card-title">{novel.title}</h2>
-      {novel.type === 'series' && (
-        <div className="card-meta">全{novel.episodeCount}話</div>
-      )}
-      {novel.avgRating != null ? (
-        <StarDisplay rating={novel.avgRating} count={novel.commentCount} />
-      ) : (
-        <div className="no-rating">まだ評価なし</div>
-      )}
-    </Link>
+    <li>
+      <Link to={to} className="novel-row">
+        <span className={`card-badge ${novel.type}`}>
+          {novel.type === 'series' ? '連載' : '単発'}
+        </span>
+        <span className="novel-row-title">{novel.title}</span>
+        {novel.type === 'series' && (
+          <span className="novel-row-episodes">全{novel.episodeCount}話</span>
+        )}
+        <span className="novel-row-rating">
+          {novel.avgRating != null ? (
+            <StarDisplay rating={novel.avgRating} count={novel.commentCount} />
+          ) : (
+            <span className="no-rating">未評価</span>
+          )}
+        </span>
+        <span className="novel-row-arrow">→</span>
+      </Link>
+    </li>
   );
 }

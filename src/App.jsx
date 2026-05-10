@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import TopPage from './components/TopPage';
 import SingleViewer from './components/SingleViewer';
+import SeriesIndex from './components/SeriesIndex';
 import SeriesViewer from './components/SeriesViewer';
 
 export default function App() {
@@ -10,7 +11,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<TopPage />} />
         <Route path="/novel/:id" element={<SingleViewer />} />
-        <Route path="/series/:id" element={<SeriesViewer />} />
+        <Route path="/series/:id" element={<SeriesIndex />} />
         <Route path="/series/:id/:episode" element={<SeriesViewer />} />
       </Routes>
     </BrowserRouter>
