@@ -8,13 +8,34 @@ export default function TopPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState('default');
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState('');
 
-  useEffect(() => {
+  const loadNovels = () => {
+    setLoading(true);
     fetch('/api/novels')
       .then(r => r.json())
       .then(data => { setNovels(data); setLoading(false); })
       .catch(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { loadNovels(); }, []);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncMsg('');
+    try {
+      const res = await fetch('/api/sync', { method: 'POST' });
+      const data = await res.json();
+      setSyncMsg(res.ok ? '同期完了' : 'エラー');
+      if (res.ok) loadNovels();
+    } catch {
+      setSyncMsg('エラー');
+    } finally {
+      setSyncing(false);
+      setTimeout(() => setSyncMsg(''), 3000);
+    }
+  };
 
   const filtered = useMemo(() => {
     let list = novels.filter(n =>
@@ -106,6 +127,15 @@ export default function TopPage() {
           </ul>
         )}
       </div>
+
+      <button
+        className="sync-btn"
+        onClick={handleSync}
+        disabled={syncing}
+        title="Google Driveから再同期"
+      >
+        {syncing ? '同期中...' : syncMsg || '↻ 再同期'}
+      </button>
     </>
   );
 }
