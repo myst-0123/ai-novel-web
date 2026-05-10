@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { StarDisplay } from './StarRating';
 
+
 export default function TopPage() {
   const [novels, setNovels] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,6 +51,7 @@ export default function TopPage() {
       <header className="site-header">
         <h1>AI小説ライブラリ</h1>
         <p>AI生成小説のコレクション</p>
+        <Link to="/upload" className="upload-link">＋ アップロード</Link>
       </header>
 
       <div className="controls">

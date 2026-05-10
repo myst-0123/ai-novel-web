@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
+import multer from 'multer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,6 +41,39 @@ const NOVELS_DIR = path.join(__dirname, 'novels');
 
 app.use(express.json());
 app.use('/novels', express.static(NOVELS_DIR));
+
+// ── multer（ファイルアップロード）────────────────────────────
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    if (file.originalname.toLowerCase().endsWith('.html')) {
+      cb(null, true);
+    } else {
+      cb(new Error('HTMLファイルのみアップロードできます'));
+    }
+  },
+});
+
+// ファイル名に使えない文字を除去（パストラバーサル対策込み）
+function sanitizeFilename(str) {
+  return String(str)
+    .trim()
+    .replace(/[\0\\/:*?"<>|]/g, '_')
+    .replace(/\.\./g, '_')
+    .replace(/^\./, '_')
+    .slice(0, 200);
+}
+
+// NOVELS_DIR の外に出ないことを保証するパス結合
+function safeJoin(base, ...parts) {
+  const resolved = path.resolve(base, ...parts);
+  if (!resolved.startsWith(path.resolve(base) + path.sep) &&
+      resolved !== path.resolve(base)) {
+    throw new Error('不正なパスです');
+  }
+  return resolved;
+}
 
 // ── ユーティリティ ────────────────────────────────────────────
 function avgRating(comments) {
@@ -232,6 +266,79 @@ app.post('/api/comments/:id(*)', async (req, res) => {
         error: 'Firestoreデータベースが見つかりません。Firebase ConsoleでFirestoreを有効化してください。',
       });
     }
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── アップロード ──────────────────────────────────────────────
+app.post('/api/upload', (req, res, next) => {
+  upload.single('file')(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    next();
+  });
+}, async (req, res) => {
+  if (!process.env.UPLOAD_PASSWORD) {
+    return res.status(503).json({ error: 'アップロード機能は無効です（UPLOAD_PASSWORD未設定）' });
+  }
+  const { password, type, title, seriesName, episodeTitle, episodeNumber } = req.body;
+
+  if (password !== process.env.UPLOAD_PASSWORD) {
+    return res.status(401).json({ error: 'パスワードが違います' });
+  }
+  if (!req.file) {
+    return res.status(400).json({ error: 'ファイルを選択してください' });
+  }
+
+  try {
+    if (type === 'series') {
+      // 連載話のアップロード
+      if (!seriesName || !seriesName.trim()) {
+        return res.status(400).json({ error: 'シリーズ名を入力してください' });
+      }
+      if (!episodeTitle || !episodeTitle.trim()) {
+        return res.status(400).json({ error: '話タイトルを入力してください' });
+      }
+      const epNum = parseInt(episodeNumber, 10);
+      if (isNaN(epNum) || epNum < 1) {
+        return res.status(400).json({ error: '話番号を正しく入力してください（1以上の整数）' });
+      }
+
+      const safeSeriesName = sanitizeFilename(seriesName.trim());
+      const safeEpTitle = sanitizeFilename(episodeTitle.trim());
+      const filename = `${safeEpTitle}_${epNum}.html`;
+
+      const seriesDir = safeJoin(NOVELS_DIR, safeSeriesName);
+      if (!fs.existsSync(seriesDir)) {
+        fs.mkdirSync(seriesDir, { recursive: true });
+      }
+      const filePath = safeJoin(seriesDir, filename);
+      fs.writeFileSync(filePath, req.file.buffer);
+
+      return res.status(201).json({
+        message: 'アップロード完了',
+        path: `/novels/${safeSeriesName}/${filename}`,
+      });
+    } else {
+      // 単発小説のアップロード
+      const rawTitle = (title && title.trim())
+        ? title.trim()
+        : req.file.originalname.replace(/\.html$/i, '');
+      const safeTitle = sanitizeFilename(rawTitle);
+      const filename = `${safeTitle}.html`;
+      const filePath = safeJoin(NOVELS_DIR, filename);
+
+      if (!fs.existsSync(NOVELS_DIR)) {
+        fs.mkdirSync(NOVELS_DIR, { recursive: true });
+      }
+      fs.writeFileSync(filePath, req.file.buffer);
+
+      return res.status(201).json({
+        message: 'アップロード完了',
+        path: `/novels/${filename}`,
+      });
+    }
+  } catch (err) {
+    console.error('/api/upload エラー:', err);
     res.status(500).json({ error: err.message });
   }
 });
