@@ -144,18 +144,16 @@ async function listDriveFiles(folderId) {
   return res.data.files || [];
 }
 
-// ── novels キャッシュ（Drive モード用）───────────────────────
-let novelCache = null;
-let novelCacheTime = 0;
-const CACHE_TTL = 60 * 1000; // 1分
+// ── キャッシュ（Drive モード用）──────────────────────────────
+let novelCache = null;                    // 小説一覧
+const contentCache = new Map();           // fileId → Buffer
 
 // ── scanNovels ────────────────────────────────────────────────
 async function scanNovels() {
 
   // ── Google Drive モード ──────────────────────────────────────
   if (drive) {
-    const now = Date.now();
-    if (novelCache && now - novelCacheTime < CACHE_TTL) return novelCache;
+    if (novelCache) return novelCache;
 
     const novels = [];
     const entries = await listDriveFiles(DRIVE_FOLDER_ID);
@@ -224,7 +222,6 @@ async function scanNovels() {
     }
 
     novelCache = novels;
-    novelCacheTime = now;
     return novels;
   }
 
@@ -323,16 +320,23 @@ app.get('/api/novels/:id(*)', async (req, res) => {
   }
 });
 
-// Drive からHTMLコンテンツを配信
+// Drive からHTMLコンテンツを配信（メモリキャッシュあり）
 app.get('/api/content/:fileId', async (req, res) => {
   if (!drive) return res.status(503).send('Google Drive 未設定');
+  const { fileId } = req.params;
   try {
+    if (contentCache.has(fileId)) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      return res.send(contentCache.get(fileId));
+    }
     const response = await drive.files.get(
-      { fileId: req.params.fileId, alt: 'media' },
-      { responseType: 'stream' }
+      { fileId, alt: 'media' },
+      { responseType: 'arraybuffer' }
     );
+    const buf = Buffer.from(response.data);
+    contentCache.set(fileId, buf);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    response.data.pipe(res);
+    res.send(buf);
   } catch (err) {
     console.error('/api/content エラー:', err.message);
     res.status(404).send('ファイルが見つかりません');
@@ -457,7 +461,7 @@ app.post('/api/upload', (req, res, next) => {
           fields: 'id',
         });
 
-        novelCache = null; // キャッシュクリア
+        novelCache = null; contentCache.clear(); // キャッシュクリア
         return res.status(201).json({ message: 'アップロード完了', path: `${safeSeriesName}/${filename}` });
 
       } else {
@@ -473,7 +477,7 @@ app.post('/api/upload', (req, res, next) => {
           fields: 'id',
         });
 
-        novelCache = null; // キャッシュクリア
+        novelCache = null; contentCache.clear(); // キャッシュクリア
         return res.status(201).json({ message: 'アップロード完了', path: filename });
       }
 
