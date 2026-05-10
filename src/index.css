@@ -581,6 +581,12 @@ body {
   font-weight: 700;
   color: var(--text-muted);
 }
+.label-optional {
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
 .form-input,
 .form-textarea {
   padding: 10px 14px;

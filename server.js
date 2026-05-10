@@ -62,7 +62,15 @@ async function fetchComments(novelId) {
       .collection('items')
       .orderBy('createdAt', 'asc')
       .get();
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    return snap.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        ...data,
+        // Firestore Timestamp → ISO 文字列に変換してクライアントに渡す
+        createdAt: data.createdAt?.toDate?.()?.toISOString() ?? null,
+      };
+    });
   } catch (err) {
     console.error('fetchComments エラー:', err.message);
     return [];
@@ -182,15 +190,19 @@ app.post('/api/comments/:id(*)', async (req, res) => {
   }
   try {
     const { name, rating, comment } = req.body;
-    // rating は任意（各話コメントは評価なし）
-    if (!name || !comment) {
-      return res.status(400).json({ error: '必須項目が入力されていません' });
+    // comment のみ必須。name は空なら「名無し」、rating は任意
+    if (!comment) {
+      return res.status(400).json({ error: 'コメントを入力してください' });
     }
+
+    const resolvedName = (name && String(name).trim())
+      ? String(name).trim().slice(0, 50)
+      : '名無し';
 
     const novelId = decodeURIComponent(req.params.id);
     const newComment = {
       id: crypto.randomUUID(),
-      name: String(name).slice(0, 50),
+      name: resolvedName,
       comment: String(comment).slice(0, 1000),
       createdAt: FieldValue.serverTimestamp(),
     };

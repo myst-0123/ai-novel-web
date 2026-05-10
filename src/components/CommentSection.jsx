@@ -37,7 +37,7 @@ export default function CommentSection({ novelId, showRating = true }) {
     e.preventDefault();
     setError('');
     setSuccess('');
-    if (!name.trim()) return setError('名前を入力してください');
+    // 名前は任意（空なら「名無し」はサーバーで処理）
     if (showRating && !rating) return setError('評価を選択してください');
     if (!comment.trim()) return setError('コメントを入力してください');
 
@@ -68,9 +68,21 @@ export default function CommentSection({ novelId, showRating = true }) {
     }
   };
 
+  // ISO文字列・Firestoreシリアライズ済みタイムスタンプ両方に対応
   const formatDate = (val) => {
     if (!val) return '';
-    const d = val?.toDate ? val.toDate() : new Date(val);
+    let d;
+    if (typeof val === 'string') {
+      d = new Date(val);
+    } else if (val._seconds !== undefined) {
+      // Firestore Timestamp が JSON化された場合 { _seconds, _nanoseconds }
+      d = new Date(val._seconds * 1000);
+    } else if (val.seconds !== undefined) {
+      d = new Date(val.seconds * 1000);
+    } else {
+      d = new Date(val);
+    }
+    if (isNaN(d.getTime())) return '';
     return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
   };
 
@@ -92,11 +104,11 @@ export default function CommentSection({ novelId, showRating = true }) {
         <h4>コメントを投稿する</h4>
         <div className="form-row">
           <div className="form-group" style={{ maxWidth: 240 }}>
-            <label>名前</label>
+            <label>名前 <span className="label-optional">（任意）</span></label>
             <input
               className="form-input"
               type="text"
-              placeholder="お名前"
+              placeholder="空欄で「名無し」"
               value={name}
               onChange={e => setName(e.target.value)}
               maxLength={50}
