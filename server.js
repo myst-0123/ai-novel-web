@@ -36,6 +36,7 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
 let drive = null;
 const DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID || null;
 const NOVELS_DIR = path.join(__dirname, 'novels');
+const HTML_EXTENSION = '.html';
 
 if (
   process.env.GOOGLE_CLIENT_ID &&
@@ -133,6 +134,14 @@ async function fetchComments(novelId) {
   }
 }
 
+function stripHtmlExtension(filename) {
+  return filename.slice(0, -HTML_EXTENSION.length);
+}
+
+function isHtmlFile(filename) {
+  return filename.endsWith(HTML_EXTENSION);
+}
+
 // ── Google Drive ユーティリティ ───────────────────────────────
 async function listDriveFiles(folderId) {
   const res = await drive.files.list({
@@ -178,33 +187,65 @@ async function syncFromDrive() {
 }
 
 // ── scanNovels（ローカルから読み取り）────────────────────────
-async function scanNovels() {
-  const novels = [];
-  if (!fs.existsSync(NOVELS_DIR)) return novels;
-
-  const entries = fs.readdirSync(NOVELS_DIR, { withFileTypes: true });
-  const novelIds = [];
-
-  for (const entry of entries) {
-    if (entry.isFile() && entry.name.endsWith('.html')) {
-      novelIds.push(entry.name.replace('.html', ''));
-    } else if (entry.isDirectory()) {
-      novelIds.push(entry.name);
+function collectNovelIds(entries) {
+  return entries.flatMap(entry => {
+    if (entry.isFile() && isHtmlFile(entry.name)) {
+      return [stripHtmlExtension(entry.name)];
     }
-  }
+    if (entry.isDirectory()) {
+      return [entry.name];
+    }
+    return [];
+  });
+}
 
+async function buildCommentStatsMap(novelIds) {
   const commentStats = await Promise.all(
     novelIds.map(async id => {
       const comments = await fetchComments(id);
       return { id, count: comments.length, avg: avgRating(comments) };
     })
   );
-  const statsMap = Object.fromEntries(commentStats.map(s => [s.id, s]));
+  return Object.fromEntries(commentStats.map(s => [s.id, s]));
+}
+
+function getCommentStats(statsMap, id) {
+  return statsMap[id] || { count: 0, avg: null };
+}
+
+function readSeriesEpisodes(seriesDir, seriesName) {
+  const episodes = [];
+  try {
+    const files = fs.readdirSync(seriesDir);
+    for (const file of files) {
+      if (!isHtmlFile(file)) continue;
+      const nameWithoutExt = stripHtmlExtension(file);
+      const lastUnderscore = nameWithoutExt.lastIndexOf('_');
+      if (lastUnderscore === -1) continue;
+      const episodeTitle = nameWithoutExt.substring(0, lastUnderscore);
+      const episodeNum = parseInt(nameWithoutExt.substring(lastUnderscore + 1), 10);
+      episodes.push({
+        fileId: nameWithoutExt,
+        title: episodeTitle,
+        number: isNaN(episodeNum) ? 0 : episodeNum,
+        htmlPath: `/novels/${seriesName}/${file}`,
+      });
+    }
+  } catch {}
+  return episodes.sort((a, b) => a.number - b.number);
+}
+
+async function scanNovels() {
+  const novels = [];
+  if (!fs.existsSync(NOVELS_DIR)) return novels;
+
+  const entries = fs.readdirSync(NOVELS_DIR, { withFileTypes: true });
+  const statsMap = await buildCommentStatsMap(collectNovelIds(entries));
 
   for (const entry of entries) {
-    if (entry.isFile() && entry.name.endsWith('.html')) {
-      const id = entry.name.replace('.html', '');
-      const stats = statsMap[id] || { count: 0, avg: null };
+    if (entry.isFile() && isHtmlFile(entry.name)) {
+      const id = stripHtmlExtension(entry.name);
+      const stats = getCommentStats(statsMap, id);
       novels.push({
         id,
         title: id,
@@ -215,27 +256,9 @@ async function scanNovels() {
       });
     } else if (entry.isDirectory()) {
       const seriesDir = path.join(NOVELS_DIR, entry.name);
-      const episodes = [];
-      try {
-        const files = fs.readdirSync(seriesDir);
-        for (const file of files) {
-          if (!file.endsWith('.html')) continue;
-          const nameWithoutExt = file.replace('.html', '');
-          const lastUnderscore = nameWithoutExt.lastIndexOf('_');
-          if (lastUnderscore === -1) continue;
-          const episodeTitle = nameWithoutExt.substring(0, lastUnderscore);
-          const episodeNum = parseInt(nameWithoutExt.substring(lastUnderscore + 1), 10);
-          episodes.push({
-            fileId: nameWithoutExt,
-            title: episodeTitle,
-            number: isNaN(episodeNum) ? 0 : episodeNum,
-            htmlPath: `/novels/${entry.name}/${file}`,
-          });
-        }
-      } catch {}
-      episodes.sort((a, b) => a.number - b.number);
+      const episodes = readSeriesEpisodes(seriesDir, entry.name);
       const id = entry.name;
-      const stats = statsMap[id] || { count: 0, avg: null };
+      const stats = getCommentStats(statsMap, id);
       novels.push({
         id,
         title: id,
