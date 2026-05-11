@@ -126,16 +126,15 @@ export default function TopPage() {
             ))}
           </ul>
         )}
+        <button
+          className="sync-btn"
+          onClick={handleSync}
+          disabled={syncing}
+          title="Google Driveから再同期"
+        >
+          {syncing ? '同期中...' : syncMsg || '↻ 再同期'}
+        </button>
       </div>
-
-      <button
-        className="sync-btn"
-        onClick={handleSync}
-        disabled={syncing}
-        title="Google Driveから再同期"
-      >
-        {syncing ? '同期中...' : syncMsg || '↻ 再同期'}
-      </button>
     </>
   );
 }
