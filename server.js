@@ -161,11 +161,14 @@ async function downloadDriveFile(fileId, destPath) {
   fs.writeFileSync(destPath, Buffer.from(response.data));
 }
 
-// Drive → ローカルに全ファイルを同期
+// Drive → ローカルに全ファイルを同期（既存をすべて削除してから再取得）
 async function syncFromDrive() {
   if (!drive) return;
   console.log('🔄 Google Drive から同期中...');
-  if (!fs.existsSync(NOVELS_DIR)) fs.mkdirSync(NOVELS_DIR, { recursive: true });
+
+  // ローカルをクリアしてから再作成
+  if (fs.existsSync(NOVELS_DIR)) fs.rmSync(NOVELS_DIR, { recursive: true, force: true });
+  fs.mkdirSync(NOVELS_DIR, { recursive: true });
 
   const entries = await listDriveFiles(DRIVE_FOLDER_ID);
   for (const entry of entries) {
