@@ -259,8 +259,22 @@ async function scanNovels() {
       });
     } else if (entry.isDirectory()) {
       const seriesDir = path.join(NOVELS_DIR, entry.name);
-      const episodes = readSeriesEpisodes(seriesDir, entry.name);
       const id = entry.name;
+      const rawEpisodes = readSeriesEpisodes(seriesDir, id);
+
+      // 各話のコメント数を並列取得
+      const epCommentCounts = await Promise.all(
+        rawEpisodes.map(async ep => {
+          const comments = await fetchComments(`${id}__ep__${ep.number}`);
+          return { number: ep.number, count: comments.length };
+        })
+      );
+      const epCountMap = Object.fromEntries(epCommentCounts.map(e => [e.number, e.count]));
+      const episodes = rawEpisodes.map(ep => ({
+        ...ep,
+        commentCount: epCountMap[ep.number] ?? 0,
+      }));
+
       const stats = getCommentStats(statsMap, id);
       novels.push({
         id,

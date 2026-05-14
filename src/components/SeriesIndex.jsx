@@ -42,6 +42,9 @@ export default function SeriesIndex() {
               >
                 <span className="si-ep-num">第 {ep.number} 話</span>
                 <span className="si-ep-title">{ep.title}</span>
+                {ep.commentCount > 0 && (
+                  <span className="si-ep-comments">{ep.commentCount}件のコメント</span>
+                )}
                 <span className="si-arrow">→</span>
               </Link>
             </li>

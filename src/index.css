@@ -277,6 +277,12 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.si-ep-comments {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 .si-arrow {
   color: var(--text-muted);
   font-size: 0.9rem;
