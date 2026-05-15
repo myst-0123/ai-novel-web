@@ -7,60 +7,13 @@ import crypto from 'crypto';
 import { Readable } from 'stream';
 import multer from 'multer';
 import { HTML_EXTENSION, sanitizeFilename, safeJoin, stripHtmlExtension, isHtmlFile } from './server/utils/utils.js';
+import { db, FieldValue } from './server/config/firebase.js';
+import { drive, DRIVE_FOLDER_ID } from './server/config/drive.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ── Firebase 初期化（任意）────────────────────────────────────
-let db = null;
-let FieldValue = null;
-
-if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-  try {
-    const { initializeApp, cert, getApps } = await import('firebase-admin/app');
-    const firestoreModule = await import('firebase-admin/firestore');
-    FieldValue = firestoreModule.FieldValue;
-    if (!getApps().length) {
-      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-      initializeApp({ credential: cert(serviceAccount) });
-    }
-    db = firestoreModule.getFirestore();
-    console.log('✅ Firestore 接続完了');
-  } catch (err) {
-    console.error('⚠️  Firestore 初期化失敗（コメント機能は無効）:', err.message);
-  }
-} else {
-  console.warn('⚠️  FIREBASE_SERVICE_ACCOUNT 未設定 — コメント機能は無効です');
-}
-
-// ── Google Drive 初期化（OAuth2）─────────────────────────────
-let drive = null;
-const DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID || null;
 const NOVELS_DIR = path.join(__dirname, 'novels');
-
-if (
-  process.env.GOOGLE_CLIENT_ID &&
-  process.env.GOOGLE_CLIENT_SECRET &&
-  process.env.GOOGLE_REFRESH_TOKEN &&
-  DRIVE_FOLDER_ID
-) {
-  try {
-    const { google } = await import('googleapis');
-    const oauth2Client = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-    );
-    oauth2Client.setCredentials({
-      refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
-    });
-    drive = google.drive({ version: 'v3', auth: oauth2Client });
-    console.log('✅ Google Drive 接続完了（OAuth2）');
-  } catch (err) {
-    console.error('⚠️  Google Drive 初期化失敗（ローカルフォルダを使用）:', err.message);
-  }
-} else {
-  console.warn('⚠️  Google Drive 環境変数未設定 — ローカルフォルダを使用');
-}
 
 // ── Express 設定 ─────────────────────────────────────────────
 const app = express();
