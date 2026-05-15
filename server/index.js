@@ -2,16 +2,17 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { drive } from './server/config/drive.js';
-import { NOVELS_DIR } from './server/config/paths.js';
-import { syncFromDrive } from './server/services/driveService.js';
-import novelsRouter from './server/routes/novels.js';
-import commentsRouter from './server/routes/comments.js';
-import uploadRouter from './server/routes/upload.js';
-import syncRouter from './server/routes/sync.js';
+import { drive } from './config/drive.js';
+import { NOVELS_DIR } from './config/paths.js';
+import { syncFromDrive } from './services/driveService.js';
+import novelsRouter from './routes/novels.js';
+import commentsRouter from './routes/comments.js';
+import uploadRouter from './routes/upload.js';
+import syncRouter from './routes/sync.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.join(__dirname, '..');
 
 // ── Express 設定 ─────────────────────────────────────────────
 const app = express();
@@ -28,9 +29,9 @@ app.use('/api/sync', syncRouter);
 
 // ── 本番: React アプリを配信 ──────────────────────────────────
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'dist')));
+  app.use(express.static(path.join(ROOT_DIR, 'dist')));
   app.get(/^(?!\/api|\/novels).*/, (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    res.sendFile(path.join(ROOT_DIR, 'dist', 'index.html'));
   });
 }
 
