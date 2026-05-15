@@ -6,14 +6,15 @@ import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 import { Readable } from 'stream';
 import multer from 'multer';
-import { HTML_EXTENSION, sanitizeFilename, safeJoin, stripHtmlExtension, isHtmlFile } from './server/utils/utils.js';
+import { HTML_EXTENSION, sanitizeFilename, safeJoin } from './server/utils/utils.js';
 import { db, FieldValue } from './server/config/firebase.js';
 import { drive, DRIVE_FOLDER_ID } from './server/config/drive.js';
+import { NOVELS_DIR } from './server/config/paths.js';
+import { fetchComments, toDocId } from './server/services/commentService.js';
+import { scanNovels } from './server/services/novelService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const NOVELS_DIR = path.join(__dirname, 'novels');
 
 // ── Express 設定 ─────────────────────────────────────────────
 const app = express();
@@ -34,40 +35,6 @@ const upload = multer({
     }
   },
 });
-
-// ── ユーティリティ ────────────────────────────────────────────
-function avgRating(comments) {
-  if (!comments || comments.length === 0) return null;
-  const sum = comments.reduce((acc, c) => acc + c.rating, 0);
-  return Math.round((sum / comments.length) * 10) / 10;
-}
-
-function toDocId(str) {
-  return str.replace(/\//g, '__SLASH__');
-}
-
-async function fetchComments(novelId) {
-  if (!db) return [];
-  try {
-    const snap = await db
-      .collection('comments')
-      .doc(toDocId(novelId))
-      .collection('items')
-      .orderBy('createdAt', 'asc')
-      .get();
-    return snap.docs.map(d => {
-      const data = d.data();
-      return {
-        id: d.id,
-        ...data,
-        createdAt: data.createdAt?.toDate?.()?.toISOString() ?? null,
-      };
-    });
-  } catch (err) {
-    console.error('fetchComments エラー:', err.message);
-    return [];
-  }
-}
 
 // ── Google Drive ユーティリティ ───────────────────────────────
 async function listDriveFiles(folderId) {
@@ -114,108 +81,6 @@ async function syncFromDrive() {
     }
   }
   console.log('✅ Google Drive 同期完了');
-}
-
-// ── scanNovels（ローカルから読み取り）────────────────────────
-function collectNovelIds(entries) {
-  return entries.flatMap(entry => {
-    if (entry.isFile() && isHtmlFile(entry.name)) {
-      return [stripHtmlExtension(entry.name)];
-    }
-    if (entry.isDirectory()) {
-      return [entry.name];
-    }
-    return [];
-  });
-}
-
-async function buildCommentStatsMap(novelIds) {
-  const commentStats = await Promise.all(
-    novelIds.map(async id => {
-      const comments = await fetchComments(id);
-      return { id, count: comments.length, avg: avgRating(comments) };
-    })
-  );
-  return Object.fromEntries(commentStats.map(s => [s.id, s]));
-}
-
-function getCommentStats(statsMap, id) {
-  return statsMap[id] || { count: 0, avg: null };
-}
-
-function readSeriesEpisodes(seriesDir, seriesName) {
-  const episodes = [];
-  try {
-    const files = fs.readdirSync(seriesDir);
-    for (const file of files) {
-      if (!isHtmlFile(file)) continue;
-      const nameWithoutExt = stripHtmlExtension(file);
-      const lastUnderscore = nameWithoutExt.lastIndexOf('_');
-      if (lastUnderscore === -1) continue;
-      const episodeTitle = nameWithoutExt.substring(0, lastUnderscore);
-      const episodeNum = parseInt(nameWithoutExt.substring(lastUnderscore + 1), 10);
-      episodes.push({
-        fileId: nameWithoutExt,
-        title: episodeTitle,
-        number: isNaN(episodeNum) ? 0 : episodeNum,
-        htmlPath: `/novels/${seriesName}/${file}`,
-      });
-    }
-  } catch {}
-  return episodes.sort((a, b) => a.number - b.number);
-}
-
-async function scanNovels() {
-  const novels = [];
-  if (!fs.existsSync(NOVELS_DIR)) return novels;
-
-  const entries = fs.readdirSync(NOVELS_DIR, { withFileTypes: true });
-  const statsMap = await buildCommentStatsMap(collectNovelIds(entries));
-
-  for (const entry of entries) {
-    if (entry.isFile() && isHtmlFile(entry.name)) {
-      const id = stripHtmlExtension(entry.name);
-      const stats = getCommentStats(statsMap, id);
-      novels.push({
-        id,
-        title: id,
-        type: 'single',
-        htmlPath: `/novels/${entry.name}`,
-        commentCount: stats.count,
-        avgRating: stats.avg,
-      });
-    } else if (entry.isDirectory()) {
-      const seriesDir = path.join(NOVELS_DIR, entry.name);
-      const id = entry.name;
-      const rawEpisodes = readSeriesEpisodes(seriesDir, id);
-
-      // 各話のコメント数を並列取得
-      const epCommentCounts = await Promise.all(
-        rawEpisodes.map(async ep => {
-          const comments = await fetchComments(`${id}__ep__${ep.number}`);
-          return { number: ep.number, count: comments.length };
-        })
-      );
-      const epCountMap = Object.fromEntries(epCommentCounts.map(e => [e.number, e.count]));
-      const episodes = rawEpisodes.map(ep => ({
-        ...ep,
-        commentCount: epCountMap[ep.number] ?? 0,
-      }));
-
-      const stats = getCommentStats(statsMap, id);
-      novels.push({
-        id,
-        title: id,
-        type: 'series',
-        episodes,
-        episodeCount: episodes.length,
-        commentCount: stats.count,
-        avgRating: stats.avg,
-      });
-    }
-  }
-
-  return novels;
 }
 
 // ── API ルート ────────────────────────────────────────────────
