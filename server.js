@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 import { Readable } from 'stream';
 import multer from 'multer';
-import { HTML_EXTENSION, sanitizeFilename, safeJoin, stripHtmlExtension, isHtmlFile } from './server/utils.js';
+import { HTML_EXTENSION, sanitizeFilename, safeJoin, stripHtmlExtension, isHtmlFile } from './server/utils/utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
