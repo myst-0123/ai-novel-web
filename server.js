@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 import { Readable } from 'stream';
 import multer from 'multer';
+import { HTML_EXTENSION, sanitizeFilename, safeJoin, stripHtmlExtension, isHtmlFile } from './server/utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,7 +37,6 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
 let drive = null;
 const DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID || null;
 const NOVELS_DIR = path.join(__dirname, 'novels');
-const HTML_EXTENSION = '.html';
 
 if (
   process.env.GOOGLE_CLIENT_ID &&
@@ -82,24 +82,6 @@ const upload = multer({
   },
 });
 
-function sanitizeFilename(str) {
-  return String(str)
-    .trim()
-    .replace(/[\0\\/:*?"<>|]/g, '_')
-    .replace(/\.\./g, '_')
-    .replace(/^\./, '_')
-    .slice(0, 200);
-}
-
-function safeJoin(base, ...parts) {
-  const resolved = path.resolve(base, ...parts);
-  if (!resolved.startsWith(path.resolve(base) + path.sep) &&
-      resolved !== path.resolve(base)) {
-    throw new Error('不正なパスです');
-  }
-  return resolved;
-}
-
 // ── ユーティリティ ────────────────────────────────────────────
 function avgRating(comments) {
   if (!comments || comments.length === 0) return null;
@@ -132,14 +114,6 @@ async function fetchComments(novelId) {
     console.error('fetchComments エラー:', err.message);
     return [];
   }
-}
-
-function stripHtmlExtension(filename) {
-  return filename.slice(0, -HTML_EXTENSION.length);
-}
-
-function isHtmlFile(filename) {
-  return filename.endsWith(HTML_EXTENSION);
 }
 
 // ── Google Drive ユーティリティ ───────────────────────────────
