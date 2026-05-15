@@ -12,6 +12,7 @@ import { drive, DRIVE_FOLDER_ID } from './server/config/drive.js';
 import { NOVELS_DIR } from './server/config/paths.js';
 import { fetchComments, toDocId } from './server/services/commentService.js';
 import { scanNovels } from './server/services/novelService.js';
+import { syncFromDrive } from './server/services/driveService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,53 +36,6 @@ const upload = multer({
     }
   },
 });
-
-// ── Google Drive ユーティリティ ───────────────────────────────
-async function listDriveFiles(folderId) {
-  const res = await drive.files.list({
-    q: `'${folderId}' in parents and trashed = false`,
-    fields: 'files(id, name, mimeType)',
-    orderBy: 'name',
-    pageSize: 1000,
-  });
-  return res.data.files || [];
-}
-
-async function downloadDriveFile(fileId, destPath) {
-  const response = await drive.files.get(
-    { fileId, alt: 'media' },
-    { responseType: 'arraybuffer' }
-  );
-  fs.writeFileSync(destPath, Buffer.from(response.data));
-}
-
-// Drive → ローカルに全ファイルを同期（既存をすべて削除してから再取得）
-async function syncFromDrive() {
-  if (!drive) return;
-  console.log('🔄 Google Drive から同期中...');
-
-  // ローカルをクリアしてから再作成
-  if (fs.existsSync(NOVELS_DIR)) fs.rmSync(NOVELS_DIR, { recursive: true, force: true });
-  fs.mkdirSync(NOVELS_DIR, { recursive: true });
-
-  const entries = await listDriveFiles(DRIVE_FOLDER_ID);
-  for (const entry of entries) {
-    if (entry.mimeType === 'application/vnd.google-apps.folder') {
-      // 連載フォルダ
-      const seriesDir = path.join(NOVELS_DIR, entry.name);
-      if (!fs.existsSync(seriesDir)) fs.mkdirSync(seriesDir, { recursive: true });
-      const seriesFiles = await listDriveFiles(entry.id);
-      for (const file of seriesFiles) {
-        if (!file.name.toLowerCase().endsWith('.html')) continue;
-        await downloadDriveFile(file.id, path.join(seriesDir, file.name));
-      }
-    } else if (entry.name.toLowerCase().endsWith('.html')) {
-      // 単発ファイル
-      await downloadDriveFile(entry.id, path.join(NOVELS_DIR, entry.name));
-    }
-  }
-  console.log('✅ Google Drive 同期完了');
-}
 
 // ── API ルート ────────────────────────────────────────────────
 app.get('/api/novels', async (req, res) => {
