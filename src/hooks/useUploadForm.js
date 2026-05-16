@@ -68,7 +68,7 @@ export function useUploadForm() {
     episodeTitle, setEpisodeTitle,
     episodeNumber, setEpisodeNumber,
     submitting,
-    error,
+    error, setError,
     success,
     handleSubmit,
   };

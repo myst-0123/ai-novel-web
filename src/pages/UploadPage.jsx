@@ -13,7 +13,7 @@ export default function UploadPage() {
     episodeTitle, setEpisodeTitle,
     episodeNumber, setEpisodeNumber,
     submitting,
-    error,
+    error, setError,
     success,
     handleSubmit,
   } = useUploadForm();
@@ -63,8 +63,9 @@ export default function UploadPage() {
                 const f = e.dataTransfer.files[0];
                 if (f && f.name.toLowerCase().endsWith('.html')) {
                   setFile(f);
+                  setError('');
                 } else {
-                  setFile(null);
+                  setError('HTMLファイルのみ選択できます');
                 }
               }}
             >
