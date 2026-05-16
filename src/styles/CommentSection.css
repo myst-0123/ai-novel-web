@@ -1,0 +1,124 @@
+/* ── Comment Section ── */
+.comment-section {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+  width: 100%;
+}
+.comment-section h3 {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+/* ── Average Rating Box ── */
+.avg-rating-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.avg-big {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--star-filled);
+  line-height: 1;
+}
+.avg-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.avg-detail .stars {
+  display: flex;
+  gap: 3px;
+}
+.avg-detail .star-icon {
+  font-size: 1.2rem;
+}
+.avg-detail small {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ── Comment Form ── */
+.comment-form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 32px;
+}
+.comment-form h4 {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  margin-bottom: 18px;
+  color: var(--text-muted);
+}
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+/* ── Comment List ── */
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.comment-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  transition: border-color 0.2s;
+}
+.comment-item:hover {
+  border-color: rgba(192, 132, 252, 0.3);
+}
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.comment-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--accent);
+}
+.comment-date {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+.comment-text {
+  font-size: 0.92rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text);
+}
+.no-comments {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 32px 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .comment-section {
+    padding: 24px 16px 48px;
+  }
+}

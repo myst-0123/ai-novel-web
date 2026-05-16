@@ -1,4 +1,5 @@
 import React from 'react';
+import './styles/global.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import TopPage from './pages/TopPage';
 import SingleViewer from './pages/SingleViewer';

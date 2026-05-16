@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { StarDisplay } from '../components/StarRating';
+import '../styles/TopPage.css';
 
 
 export default function TopPage() {

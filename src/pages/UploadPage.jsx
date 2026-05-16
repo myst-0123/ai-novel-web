@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import '../styles/UploadPage.css';
 
 export default function UploadPage() {
   const [password, setPassword] = useState('');

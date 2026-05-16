@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { StarDisplay } from '../components/StarRating';
 import CommentSection from '../components/CommentSection';
+import '../styles/SeriesIndex.css';
 
 export default function SeriesIndex() {
   const { id } = useParams();
