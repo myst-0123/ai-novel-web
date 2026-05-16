@@ -1,19 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { StarDisplay } from './StarRating';
-import CommentSection from './CommentSection';
+import { StarDisplay } from '../components/StarRating';
+import CommentSection from '../components/CommentSection';
+import { useNovel } from '../hooks/useNovel';
+import '../styles/SeriesIndex.css';
 
 export default function SeriesIndex() {
   const { id } = useParams();
-  const [novel, setNovel] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`/api/novels/${encodeURIComponent(id)}`)
-      .then(r => r.json())
-      .then(data => { setNovel(data); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, [id]);
+  const { novel, loading } = useNovel(id);
 
   if (loading) return <div className="loading">読み込み中...</div>;
   if (!novel)  return <div className="empty-state">作品が見つかりません</div>;
