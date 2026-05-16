@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StarDisplay, StarPicker } from './StarRating';
 import '../styles/CommentSection.css';
 
@@ -12,11 +12,16 @@ export default function CommentSection({ novelId, showRating = true, comments, l
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // 評価ありコメントのみで平均を計算
-  const ratedComments = comments.filter(c => c.rating != null);
-  const avgRating = showRating && ratedComments.length > 0
-    ? ratedComments.reduce((s, c) => s + c.rating, 0) / ratedComments.length
-    : null;
+  const { ratedComments, avgRating, reversedComments } = useMemo(() => {
+    const rated = comments.filter(c => c.rating != null);
+    return {
+      ratedComments: rated,
+      avgRating: showRating && rated.length > 0
+        ? rated.reduce((s, c) => s + c.rating, 0) / rated.length
+        : null,
+      reversedComments: [...comments].reverse(),
+    };
+  }, [comments, showRating]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -129,7 +134,7 @@ export default function CommentSection({ novelId, showRating = true, comments, l
         <div className="no-comments">まだコメントはありません。最初の感想を書きませんか？</div>
       ) : (
         <div className="comment-list">
-          {[...comments].reverse().map(c => (
+          {reversedComments.map(c => (
             <div key={c.id} className="comment-item">
               <div className="comment-meta">
                 <span className="comment-name">{c.name}</span>
