@@ -1,32 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { StarDisplay, StarPicker } from './StarRating';
 import '../styles/CommentSection.css';
 
 // showRating=true  → 星評価あり（単発・連載全体用）
 // showRating=false → コメントのみ（各話用）
-export default function CommentSection({ novelId, showRating = true }) {
-  const [comments, setComments] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function CommentSection({ novelId, showRating = true, comments, loading, refetch }) {
   const [name, setName] = useState('');
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  const fetchComments = () => {
-    setLoading(true);
-    fetch(`/api/comments/${encodeURIComponent(novelId)}`)
-      .then(r => r.json())
-      .then(data => { setComments(Array.isArray(data) ? data : []); setLoading(false); })
-      .catch(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    setComments([]);
-    setLoading(true);
-    fetchComments();
-  }, [novelId]);
 
   // 評価ありコメントのみで平均を計算
   const ratedComments = comments.filter(c => c.rating != null);
@@ -60,7 +44,7 @@ export default function CommentSection({ novelId, showRating = true }) {
         setName('');
         setRating(0);
         setComment('');
-        fetchComments();
+        refetch();
       }
     } catch {
       setError('ネットワークエラーが発生しました');
