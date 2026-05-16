@@ -33,4 +33,37 @@ async function fetchComments(novelId) {
   }
 }
 
-export { avgRating, toDocId, fetchComments };
+function toComment(doc) {
+  const data = doc.data();
+  return {
+    id: doc.id,
+    ...data,
+    createdAt: data.createdAt?.toDate?.()?.toISOString() ?? null,
+  };
+}
+
+async function fetchAllComments() {
+  if (!db) return {};
+  try {
+    const snap = await db.collectionGroup('items').get();
+    const map = {};
+    for (const doc of snap.docs) {
+      const novelId = doc.ref.parent.parent.id;
+      if (!map[novelId]) map[novelId] = [];
+      map[novelId].push(toComment(doc));
+    }
+    for (const comments of Object.values(map)) {
+      comments.sort((a, b) => {
+        if (!a.createdAt) return 1;
+        if (!b.createdAt) return -1;
+        return a.createdAt.localeCompare(b.createdAt);
+      });
+    }
+    return map;
+  } catch (err) {
+    console.error('fetchAllComments エラー:', err.message);
+    return {};
+  }
+}
+
+export { avgRating, toDocId, fetchComments, fetchAllComments };
