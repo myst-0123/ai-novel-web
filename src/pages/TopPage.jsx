@@ -81,7 +81,7 @@ export default function TopPage() {
   );
 }
 
-function NovelRow({ novel }) {
+const NovelRow = React.memo(function NovelRow({ novel }) {
   const to = novel.type === 'series'
     ? `/series/${encodeURIComponent(novel.id)}`
     : `/novel/${encodeURIComponent(novel.id)}`;
@@ -107,4 +107,4 @@ function NovelRow({ novel }) {
       </Link>
     </li>
   );
-}
+});

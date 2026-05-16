@@ -3,11 +3,13 @@ import { useParams, Link } from 'react-router-dom';
 import { StarDisplay } from '../components/StarRating';
 import CommentSection from '../components/CommentSection';
 import { useNovel } from '../hooks/useNovel';
+import { useComments } from '../hooks/useComments';
 import '../styles/SeriesIndex.css';
 
 export default function SeriesIndex() {
   const { id } = useParams();
   const { novel, loading } = useNovel(id);
+  const { comments, loading: commentsLoading, refetch } = useComments(id);
 
   if (loading) return <div className="loading">読み込み中...</div>;
   if (!novel)  return <div className="empty-state">作品が見つかりません</div>;
@@ -46,7 +48,7 @@ export default function SeriesIndex() {
         </ul>
 
         {/* 作品全体へのコメント・評価（星評価あり） */}
-        <CommentSection novelId={id} showRating={true} />
+        <CommentSection novelId={id} showRating={true} comments={comments} loading={commentsLoading} refetch={refetch} />
       </div>
     </>
   );

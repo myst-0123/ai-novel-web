@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StarDisplay, StarPicker } from './StarRating';
 import '../styles/CommentSection.css';
 
 // showRating=true  → 星評価あり（単発・連載全体用）
 // showRating=false → コメントのみ（各話用）
-export default function CommentSection({ novelId, showRating = true }) {
-  const [comments, setComments] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function CommentSection({ novelId, showRating = true, comments, loading, refetch }) {
   const [name, setName] = useState('');
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -14,25 +12,16 @@ export default function CommentSection({ novelId, showRating = true }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const fetchComments = () => {
-    setLoading(true);
-    fetch(`/api/comments/${encodeURIComponent(novelId)}`)
-      .then(r => r.json())
-      .then(data => { setComments(Array.isArray(data) ? data : []); setLoading(false); })
-      .catch(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    setComments([]);
-    setLoading(true);
-    fetchComments();
-  }, [novelId]);
-
-  // 評価ありコメントのみで平均を計算
-  const ratedComments = comments.filter(c => c.rating != null);
-  const avgRating = showRating && ratedComments.length > 0
-    ? ratedComments.reduce((s, c) => s + c.rating, 0) / ratedComments.length
-    : null;
+  const { ratedComments, avgRating, reversedComments } = useMemo(() => {
+    const rated = comments.filter(c => c.rating != null);
+    return {
+      ratedComments: rated,
+      avgRating: showRating && rated.length > 0
+        ? rated.reduce((s, c) => s + c.rating, 0) / rated.length
+        : null,
+      reversedComments: [...comments].reverse(),
+    };
+  }, [comments, showRating]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,7 +49,7 @@ export default function CommentSection({ novelId, showRating = true }) {
         setName('');
         setRating(0);
         setComment('');
-        fetchComments();
+        refetch();
       }
     } catch {
       setError('ネットワークエラーが発生しました');
@@ -145,7 +134,7 @@ export default function CommentSection({ novelId, showRating = true }) {
         <div className="no-comments">まだコメントはありません。最初の感想を書きませんか？</div>
       ) : (
         <div className="comment-list">
-          {[...comments].reverse().map(c => (
+          {reversedComments.map(c => (
             <div key={c.id} className="comment-item">
               <div className="comment-meta">
                 <span className="comment-name">{c.name}</span>
