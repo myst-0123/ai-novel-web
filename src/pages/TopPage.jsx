@@ -1,72 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { StarDisplay } from '../components/StarRating';
+import { useNovelList } from '../hooks/useNovelList';
+import { useNovelFilter } from '../hooks/useNovelFilter';
 import '../styles/TopPage.css';
 
-
 export default function TopPage() {
-  const [novels, setNovels] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [sortOrder, setSortOrder] = useState('default');
-  const [syncing, setSyncing] = useState(false);
-  const [syncMsg, setSyncMsg] = useState('');
-
-  const loadNovels = () => {
-    setLoading(true);
-    fetch('/api/novels')
-      .then(r => r.json())
-      .then(data => { setNovels(data); setLoading(false); })
-      .catch(() => setLoading(false));
-  };
-
-  useEffect(() => { loadNovels(); }, []);
-
-  const handleSync = async () => {
-    setSyncing(true);
-    setSyncMsg('');
-    try {
-      const res = await fetch('/api/sync', { method: 'POST' });
-      const data = await res.json();
-      setSyncMsg(res.ok ? '同期完了' : 'エラー');
-      if (res.ok) loadNovels();
-    } catch {
-      setSyncMsg('エラー');
-    } finally {
-      setSyncing(false);
-      setTimeout(() => setSyncMsg(''), 3000);
-    }
-  };
-
-  const filtered = useMemo(() => {
-    let list = novels.filter(n =>
-      n.title.toLowerCase().includes(search.toLowerCase()) ||
-      n.title.includes(search)
-    );
-    switch (sortOrder) {
-      case 'asc':
-        list = [...list].sort((a, b) => a.title.localeCompare(b.title, 'ja'));
-        break;
-      case 'desc':
-        list = [...list].sort((a, b) => b.title.localeCompare(a.title, 'ja'));
-        break;
-      case 'rating-desc':
-        list = [...list].sort((a, b) => (b.avgRating ?? -Infinity) - (a.avgRating ?? -Infinity));
-        break;
-      case 'rating-asc':
-        list = [...list].sort((a, b) => (a.avgRating ?? Infinity) - (b.avgRating ?? Infinity));
-        break;
-      case 'count-desc':
-        list = [...list].sort((a, b) => (b.commentCount ?? 0) - (a.commentCount ?? 0));
-        break;
-      case 'count-asc':
-        list = [...list].sort((a, b) => (a.commentCount ?? 0) - (b.commentCount ?? 0));
-        break;
-      default:
-        break;
-    }
-    return list;
-  }, [novels, search, sortOrder]);
+  const { novels, loading, syncing, syncMsg, handleSync } = useNovelList();
+  const { search, setSearch, sortOrder, setSortOrder, filtered } = useNovelFilter(novels);
 
   return (
     <>
