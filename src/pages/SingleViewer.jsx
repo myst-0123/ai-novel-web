@@ -2,10 +2,12 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import CommentSection from '../components/CommentSection';
 import { useNovel } from '../hooks/useNovel';
+import { useComments } from '../hooks/useComments';
 
 export default function SingleViewer() {
   const { id } = useParams();
   const { novel, loading } = useNovel(id);
+  const { comments, loading: commentsLoading, refetch } = useComments(id);
 
   if (loading) return <div className="loading">読み込み中...</div>;
   if (!novel) return <div className="empty-state">小説が見つかりません</div>;
@@ -23,7 +25,7 @@ export default function SingleViewer() {
             src={novel.htmlPath}
             title={novel.title}
           />
-          <CommentSection novelId={id} />
+          <CommentSection novelId={id} comments={comments} loading={commentsLoading} refetch={refetch} />
         </main>
       </div>
     </>

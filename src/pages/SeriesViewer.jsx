@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import CommentSection from '../components/CommentSection';
 import { useNovel } from '../hooks/useNovel';
+import { useComments } from '../hooks/useComments';
 import '../styles/SeriesViewer.css';
 
 export default function SeriesViewer() {
@@ -20,6 +21,7 @@ export default function SeriesViewer() {
 
   // 各話のコメントID：シリーズID + "__ep__" + 話数
   const episodeCommentId = `${id}__ep__${currentNum}`;
+  const { comments, loading: commentsLoading, refetch } = useComments(episodeCommentId);
 
   const goToEp = (ep) => {
     setSidebarOpen(false);
@@ -103,7 +105,7 @@ export default function SeriesViewer() {
           </nav>
 
           {/* 各話コメント：評価なし・コメントのみ */}
-          <CommentSection novelId={episodeCommentId} showRating={false} />
+          <CommentSection novelId={episodeCommentId} showRating={false} comments={comments} loading={commentsLoading} refetch={refetch} />
         </main>
       </div>
     </>
