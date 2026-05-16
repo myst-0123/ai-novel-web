@@ -1,4 +1,5 @@
 import React from 'react';
+import '../styles/StarRating.css';
 
 export function StarDisplay({ rating, count, size = 'sm' }) {
   const rounded = Math.round(rating * 2) / 2;

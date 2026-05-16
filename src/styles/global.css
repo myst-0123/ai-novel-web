@@ -1,0 +1,213 @@
+/* ── CSS Variables ── */
+:root {
+  --bg: #0f0f15;
+  --surface: #1a1a26;
+  --surface-2: #22222f;
+  --header-bg: #09090e;
+  --header-text: #e8e8f2;
+  --accent: #c084fc;
+  --accent-hover: #a855f7;
+  --text: #e2e2ec;
+  --text-muted: #7070a0;
+  --border: #2a2a3e;
+  --sidebar-bg: #13131e;
+  --sidebar-width: 260px;
+  --star-filled: #fbbf24;
+  --star-empty: #3a3a58;
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  --shadow-hover: 0 6px 28px rgba(0, 0, 0, 0.7);
+  --radius: 10px;
+  --font-serif: 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+  --font-sans: 'Noto Sans JP', 'Hiragino Sans', 'Meiryo', system-ui, sans-serif;
+}
+
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ── Loading / Empty ── */
+.loading, .empty-state {
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+/* ── Site Header (TopPage / UploadPage) ── */
+.site-header {
+  background: var(--header-bg);
+  color: var(--header-text);
+  padding: 32px 40px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.site-header h1 {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background: linear-gradient(135deg, #c084fc, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.site-header p {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* ── Page Header + Back Button (SingleViewer / SeriesIndex / SeriesViewer) ── */
+.page-header {
+  background: var(--header-bg);
+  color: var(--header-text);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.back-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.back-btn:hover {
+  background: rgba(255,255,255,0.15);
+}
+.page-header h2 {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+/* ── Viewer Layout (SingleViewer / SeriesViewer) ── */
+.viewer-layout {
+  display: flex;
+  min-height: calc(100vh - 60px);
+}
+.viewer-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.novel-iframe {
+  flex: 1;
+  width: 100%;
+  border: none;
+  min-height: 70vh;
+}
+
+/* ── Shared Form Parts (CommentSection / UploadPage) ── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 160px;
+}
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.label-optional {
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+.form-input,
+.form-textarea {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  color: var(--text);
+  background: var(--surface-2);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: vertical;
+}
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--text-muted);
+}
+.form-input:focus,
+.form-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.15);
+}
+.form-textarea {
+  min-height: 100px;
+}
+.submit-btn {
+  margin-top: 8px;
+  padding: 12px 32px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.submit-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+.submit-btn:disabled {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  border: 1px solid var(--border);
+}
+.form-error {
+  color: #f87171;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+.form-success {
+  color: #4ade80;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .site-header {
+    padding: 20px 20px;
+  }
+  .site-header h1 {
+    font-size: 1.4rem;
+  }
+  .viewer-layout {
+    flex-direction: column;
+  }
+}

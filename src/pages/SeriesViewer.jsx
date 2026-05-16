@@ -1,21 +1,15 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import CommentSection from './CommentSection';
+import CommentSection from '../components/CommentSection';
+import { useNovel } from '../hooks/useNovel';
+import '../styles/SeriesViewer.css';
 
 export default function SeriesViewer() {
   const { id, episode } = useParams();
   const navigate = useNavigate();
-  const [novel, setNovel] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { novel, loading } = useNovel(id);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const mainRef = useRef(null);
-
-  useEffect(() => {
-    fetch(`/api/novels/${encodeURIComponent(id)}`)
-      .then(r => r.json())
-      .then(data => { setNovel(data); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, [id]);
 
   const currentNum = episode ? parseInt(episode, 10) : 1;
   const currentEp = novel?.episodes?.find(e => e.number === currentNum)

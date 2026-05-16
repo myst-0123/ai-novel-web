@@ -1,0 +1,49 @@
+/* ── Star Display ── */
+.stars-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.stars-display .stars {
+  display: flex;
+  gap: 2px;
+}
+.star-icon {
+  font-size: 1rem;
+  color: var(--star-empty);
+  transition: color 0.1s;
+}
+.star-icon.filled {
+  color: var(--star-filled);
+}
+.rating-val {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--star-filled);
+}
+.rating-count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ── Star Picker ── */
+.star-picker {
+  display: flex;
+  gap: 4px;
+}
+.star-picker button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.6rem;
+  color: var(--star-empty);
+  transition: color 0.1s, transform 0.1s;
+  line-height: 1;
+  padding: 0;
+}
+.star-picker button.active {
+  color: var(--star-filled);
+}
+.star-picker button:hover {
+  transform: scale(1.15);
+}

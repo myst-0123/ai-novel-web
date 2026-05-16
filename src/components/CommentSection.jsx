@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StarDisplay, StarPicker } from './StarRating';
+import '../styles/CommentSection.css';
 
 // showRating=true  → 星評価あり（単発・連載全体用）
 // showRating=false → コメントのみ（各話用）
