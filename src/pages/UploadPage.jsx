@@ -80,7 +80,7 @@ export default function UploadPage() {
                 accept=".html"
                 onChange={(e) => {
                   const f = e.target.files[0];
-                  if (f) setFile(f);
+                  if (f) { setFile(f); setError('')};
                 }}
               />
             </div>
