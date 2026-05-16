@@ -1,20 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useNovelsContext } from '../context/NovelsContext';
 
 export function useNovelList() {
-  const [novels, setNovels] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { novels, loading, reload } = useNovelsContext();
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState('');
-
-  const load = () => {
-    setLoading(true);
-    fetch('/api/novels')
-      .then(r => r.json())
-      .then(data => { setNovels(data); setLoading(false); })
-      .catch(() => setLoading(false));
-  };
-
-  useEffect(() => { load(); }, []);
 
   const handleSync = async () => {
     setSyncing(true);
@@ -23,7 +13,7 @@ export function useNovelList() {
       const res = await fetch('/api/sync', { method: 'POST' });
       await res.json();
       setSyncMsg(res.ok ? '同期完了' : 'エラー');
-      if (res.ok) load();
+      if (res.ok) reload();
     } catch {
       setSyncMsg('エラー');
     } finally {
