@@ -1,10 +1,10 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import TopPage from './components/TopPage';
-import SingleViewer from './components/SingleViewer';
-import SeriesIndex from './components/SeriesIndex';
-import SeriesViewer from './components/SeriesViewer';
-import UploadPage from './components/UploadPage';
+import TopPage from './pages/TopPage';
+import SingleViewer from './pages/SingleViewer';
+import SeriesIndex from './pages/SeriesIndex';
+import SeriesViewer from './pages/SeriesViewer';
+import UploadPage from './pages/UploadPage';
 
 export default function App() {
   return (

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import CommentSection from './CommentSection';
+import CommentSection from '../components/CommentSection';
 
 export default function SingleViewer() {
   const { id } = useParams();

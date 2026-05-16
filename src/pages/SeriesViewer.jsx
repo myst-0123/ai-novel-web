@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import CommentSection from './CommentSection';
+import CommentSection from '../components/CommentSection';
 
 export default function SeriesViewer() {
   const { id, episode } = useParams();
