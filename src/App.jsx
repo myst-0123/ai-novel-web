@@ -13,7 +13,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <NovelsProvider>
-        <Suspense fallback={<div className="loading">読み込み中...</div>}>
+        <Suspense fallback={<div style={{ minHeight: '100dvh' }} />}>
           <Routes>
             <Route path="/" element={<TopPage />} />
             <Route path="/novel/:id" element={<SingleViewer />} />
