@@ -5,6 +5,7 @@ import multer from 'multer';
 import { drive, DRIVE_FOLDER_ID } from '../config/drive.js';
 import { NOVELS_DIR } from '../config/paths.js';
 import { sanitizeFilename, safeJoin } from '../utils/utils.js';
+import { rebuildManifest } from '../services/manifestService.js';
 
 const router = Router();
 
@@ -82,6 +83,7 @@ router.post('/', (req, res, next) => {
         });
       }
 
+      await rebuildManifest();
       return res.status(201).json({
         message: 'アップロード完了',
         path: `${safeSeriesName}/${filename}`,
@@ -105,6 +107,7 @@ router.post('/', (req, res, next) => {
         });
       }
 
+      await rebuildManifest();
       return res.status(201).json({
         message: 'アップロード完了',
         path: filename,

@@ -1,8 +1,5 @@
-import fsp from 'fs/promises';
-import path from 'path';
-import { isHtmlFile, stripHtmlExtension } from '../utils/utils.js';
 import { fetchAllComments, avgRating } from './commentService.js';
-import { NOVELS_DIR } from '../config/paths.js';
+import { readManifest } from './manifestService.js';
 
 function buildStatsMap(allComments) {
   const map = {};
@@ -16,73 +13,36 @@ function getCommentStats(statsMap, id) {
   return statsMap[id] || { count: 0, avg: null };
 }
 
-async function readSeriesEpisodes(seriesDir, seriesName) {
-  const episodes = [];
-  try {
-    const files = await fsp.readdir(seriesDir);
-    for (const file of files) {
-      if (!isHtmlFile(file)) continue;
-      const nameWithoutExt = stripHtmlExtension(file);
-      const lastUnderscore = nameWithoutExt.lastIndexOf('_');
-      if (lastUnderscore === -1) continue;
-      const episodeTitle = nameWithoutExt.substring(0, lastUnderscore);
-      const episodeNum = parseInt(nameWithoutExt.substring(lastUnderscore + 1), 10);
-      episodes.push({
-        fileId: nameWithoutExt,
-        title: episodeTitle,
-        number: isNaN(episodeNum) ? 0 : episodeNum,
-        htmlPath: `/novels/${seriesName}/${file}`,
-      });
-    }
-  } catch {}
-  return episodes.sort((a, b) => a.number - b.number);
-}
-
 async function scanNovels() {
-  const novels = [];
-  try {
-    await fsp.access(NOVELS_DIR);
-  } catch {
-    return novels;
-  }
-
-  const entries = await fsp.readdir(NOVELS_DIR, { withFileTypes: true });
-
-  const singleEntries = entries.filter(e => e.isFile() && isHtmlFile(e.name));
-  const seriesEntries = entries.filter(e => e.isDirectory());
-
-  const [allComments, ...seriesEpisodesList] = await Promise.all([
+  const [manifest, allComments] = await Promise.all([
+    readManifest(),
     fetchAllComments(),
-    ...seriesEntries.map(e => readSeriesEpisodes(path.join(NOVELS_DIR, e.name), e.name)),
   ]);
 
   const statsMap = buildStatsMap(allComments);
+  const novels = [];
 
-  for (const entry of singleEntries) {
-    const id = stripHtmlExtension(entry.name);
-    const stats = getCommentStats(statsMap, id);
+  for (const entry of manifest.singles) {
+    const stats = getCommentStats(statsMap, entry.id);
     novels.push({
-      id,
-      title: id,
+      id: entry.id,
+      title: entry.id,
       type: 'single',
-      htmlPath: `/novels/${entry.name}`,
+      htmlPath: entry.htmlPath,
       commentCount: stats.count,
       avgRating: stats.avg,
     });
   }
 
-  for (let i = 0; i < seriesEntries.length; i++) {
-    const entry = seriesEntries[i];
-    const id = entry.name;
-    const rawEpisodes = seriesEpisodesList[i];
-    const episodes = rawEpisodes.map(ep => ({
+  for (const entry of manifest.series) {
+    const episodes = entry.episodes.map(ep => ({
       ...ep,
-      commentCount: getCommentStats(statsMap, `${id}__ep__${ep.number}`).count,
+      commentCount: getCommentStats(statsMap, `${entry.id}__ep__${ep.number}`).count,
     }));
-    const stats = getCommentStats(statsMap, id);
+    const stats = getCommentStats(statsMap, entry.id);
     novels.push({
-      id,
-      title: id,
+      id: entry.id,
+      title: entry.id,
       type: 'series',
       episodes,
       episodeCount: episodes.length,

@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { drive, DRIVE_FOLDER_ID } from '../config/drive.js';
 import { NOVELS_DIR } from '../config/paths.js';
+import { rebuildManifest } from './manifestService.js';
 
 async function listDriveFiles(folderId) {
   const res = await drive.files.list({
@@ -43,6 +44,7 @@ async function syncFromDrive() {
       await downloadDriveFile(entry.id, path.join(NOVELS_DIR, entry.name));
     }
   }
+  await rebuildManifest();
   console.log('✅ Google Drive 同期完了');
 }
 
