@@ -10,7 +10,8 @@ async function readManifest() {
     const raw = await fsp.readFile(MANIFEST_PATH, 'utf-8');
     return JSON.parse(raw);
   } catch {
-    return EMPTY_MANIFEST;
+    console.warn('novels-manifest.json の読み込みに失敗しました。ファイルシステムから再構築します。');
+    return rebuildManifest();
   }
 }
 
